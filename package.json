@@ -1,0 +1,13 @@
+{
+  "name": "turbocraft",
+  "version": "0.0.1",
+  "description": "Interactive CLI for scaffolding full-stack monorepo templates with your choice of framework, auth, database, and UI.",
+  "license": "MIT",
+  "keywords": ["turborepo", "scaffold", "cli", "generator"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sustinbebustin/turbocraft.git"
+  },
+  "homepage": "https://github.com/sustinbebustin/turbocraft#readme",
+  "bugs": { "url": "https://github.com/sustinbebustin/turbocraft/issues" }
+}
