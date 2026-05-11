@@ -21,9 +21,10 @@
     "url": "https://github.com/sustinbebustin/turbocraft/issues"
   },
   "bin": {
-    "turbocraft": "./dist/bin.mjs"
+    "turbocraft": "./bin/turbocraft.mjs"
   },
   "files": [
+    "bin",
     "dist",
     "templates"
   ],
