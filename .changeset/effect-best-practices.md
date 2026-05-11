@@ -1,4 +1,5 @@
 ---
+"turbocraft": patch
 ---
 
-Internal refactor; no consumer-visible changes.
+Improve CLI error handling with structured error messages and automatic cleanup of partial scaffolds on failure.
