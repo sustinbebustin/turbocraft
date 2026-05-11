@@ -1,5 +1,14 @@
 # create-turbocraft
 
+## 0.1.2
+
+### Patch Changes
+
+- bd90089: Ship READMEs in the published tarballs so the package pages on npmjs.com render docs and version badges instead of "no readme data".
+- Updated dependencies [800706f]
+- Updated dependencies [bd90089]
+  - turbocraft@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
