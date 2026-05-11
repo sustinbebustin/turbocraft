@@ -43,7 +43,9 @@ turbocraft create
   Project name           > my-app
   Framework              > Next.js
   Layout                 > Monorepo (apps/ + packages/)
-  Features               > [x] Convex   [x] Better Auth
+  Features               > [x] shadcn/ui  [x] Convex  [x] Better Auth
+  shadcn preset          > Default (base-lyra + phosphor + neutral)
+  Components to install  > Select   (then multi-select from the live registry)
   Package manager        > pnpm
   Install dependencies?  > Yes
   Initialise git?        > Yes
@@ -60,13 +62,21 @@ already-answered and the wizard skips it:
 turbocraft create my-app \
   --framework nextjs \
   --layout monorepo \
-  --features convex,better-auth \
+  --features shadcn,convex,better-auth \
+  --shadcn-preset buFznsW \
+  --shadcn-components button,card,input,label \
   --pm pnpm \
   --install \
   --git
 ```
 
-To scaffold *without* running install or git (useful in tests):
+`--shadcn-preset` accepts any code from
+[ui.shadcn.com/create](https://ui.shadcn.com/create); the default
+`buFznsW` is base-lyra + phosphor icons + neutral baseColor.
+`--shadcn-components` is `all`, `none`, or a comma-separated list of
+component names.
+
+To scaffold _without_ running install or git (useful in tests):
 
 ```bash
 turbocraft create /tmp/probe \
@@ -83,10 +93,14 @@ A turborepo (or single-app) with:
 
 - **pnpm 10** workspaces, catalog-driven versioning, Turbo 2.9 pipelines.
 - **TypeScript 6** strict mode + Vitest (jsdom) + oxlint + oxfmt + knip.
-- **shadcn/ui** (56 components) + Tailwind 4 + Phosphor Icons.
+- **Tailwind 4** baked in for every variant.
 - **Effect.ts** with the `@effect/language-service` typecheck patch wired in.
-- Optional **Convex** (with schema dir) and **Better Auth** (gated on Convex)
-  layers.
+- Optional **shadcn/ui** layer: opt-in, choose a preset (default
+  base-lyra + phosphor + neutral, or paste your own from
+  [ui.shadcn.com/create](https://ui.shadcn.com/create)), and pick which
+  components to install (none / specific list / all).
+- Optional **Convex** (with schema dir) and **Better Auth** (auto-includes
+  Convex + shadcn) layers.
 - A `turbo/generators/` Plop config — run `turbocraft add app` or
   `turbo gen run app` inside the project to extend it.
 

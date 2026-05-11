@@ -3,6 +3,7 @@ import {
   cancel,
   group,
   isCancel,
+  note,
   text,
   select,
   multiselect,
@@ -16,11 +17,13 @@ import {
   Layout,
   PackageManager,
   ProjectConfig,
+  SHADCN_ALL_COMPONENTS,
   variantIdFor,
   type Feature as FeatureT,
   type Framework as FrameworkT,
   type Layout as LayoutT,
   type PackageManager as PackageManagerT,
+  type ShadcnConfig,
 } from "@turbocraft/core";
 import {
   UserCancelled,
@@ -29,12 +32,47 @@ import {
   WizardError,
 } from "../domain/errors.ts";
 import { allFeatureCompatibility } from "@turbocraft/templates";
+import { ShadcnRegistry } from "../services/ShadcnRegistry.ts";
+
+// Default preset code from https://ui.shadcn.com/create — base style + lyra
+// theme + phosphor icons + neutral baseColor. Matches the components.json
+// turbocraft used to ship before shadcn became opt-in.
+export const DEFAULT_SHADCN_PRESET = "buFznsW";
+
+/**
+ * Accept whatever shadcn's "create" page hands the user — the copy button
+ * yields a full command line like
+ *   `pnpm dlx shadcn@latest init --preset a2r6bw --base base --template next`
+ * — and reduce it to just the preset code. Falls through to the trimmed
+ * input when no `--preset` token is found so a bare code still works.
+ */
+export const extractPresetCode = (raw: string): string => {
+  const trimmed = raw.trim();
+  const match = trimmed.match(/--preset[=\s]+([A-Za-z0-9_-]+)/u);
+  return match?.[1] ?? trimmed;
+};
+
+// Used as a last-resort fallback when the shadcn registry index isn't
+// reachable. Just enough primitives to keep the multiselect useful.
+const FALLBACK_SHADCN_COMPONENTS: ReadonlyArray<string> = [
+  "button",
+  "card",
+  "dialog",
+  "dropdown-menu",
+  "input",
+  "label",
+  "separator",
+  "sheet",
+  "sonner",
+] as const;
 
 export type WizardInput = {
   readonly name?: string;
   readonly framework?: FrameworkT;
   readonly layout?: LayoutT;
   readonly features?: ReadonlyArray<FeatureT>;
+  readonly shadcnPreset?: string;
+  readonly shadcnComponents?: ReadonlyArray<string>;
   readonly packageManager?: PackageManagerT;
   readonly install?: boolean;
   readonly git?: boolean;
@@ -90,17 +128,24 @@ const expandFeatureRequires = (
   return [...out];
 };
 
-export const runWizard = (
+type GroupAnswers = {
+  readonly name: string;
+  readonly framework: FrameworkT;
+  readonly layout: LayoutT;
+  readonly featuresRaw: ReadonlyArray<FeatureT>;
+  readonly packageManager: PackageManagerT;
+  readonly install: boolean;
+  readonly git: boolean;
+};
+
+const runMainGroup = (
   input: WizardInput
 ): Effect.Effect<
-  ProjectConfig,
-  UserCancelled | InvalidConfig | TargetDirNotEmpty | WizardError
+  GroupAnswers,
+  UserCancelled | TargetDirNotEmpty | WizardError
 > =>
   Effect.tryPromise({
     try: async () => {
-      // When the name is supplied non-interactively, validate the target dir
-      // before showing any prompts so the user isn't asked questions only to
-      // hit a hard failure at scaffold time.
       if (input.name !== undefined) {
         const targetDir = resolve(input.cwd, input.name);
         const conflicts = findConflicts(targetDir);
@@ -165,12 +210,13 @@ export const runWizard = (
               ? Promise.resolve([...input.features])
               : multiselect<FeatureT>({
                   message:
-                    "Features (space to toggle; Better Auth implies Convex)",
+                    "Features (space to toggle; Better Auth implies Convex + shadcn)",
                   options: [
+                    { value: "shadcn", label: "shadcn/ui components" },
                     { value: "convex", label: "Convex backend" },
                     {
                       value: "better-auth",
-                      label: "Better Auth (requires Convex)",
+                      label: "Better Auth (requires Convex + shadcn)",
                     },
                   ],
                   required: false,
@@ -207,48 +253,197 @@ export const runWizard = (
         }
       );
 
-      const name = guard(answers.name, "name");
-      const framework = guard(answers.framework, "framework");
-      const layout = guard(answers.layout, "layout");
-      const featuresRaw = guard(answers.features, "features") ?? [];
-      const packageManager = guard(answers.packageManager, "packageManager");
-      const install = guard(answers.install, "install");
-      const git = guard(answers.git, "git");
-
-      // Expand feature requires from each feature's compatibility declaration
-      // so e.g. better-auth pulls in convex automatically.
-      const features = expandFeatureRequires(featuresRaw);
-
-      const parsed = ProjectConfig.safeParse({
-        name,
-        targetDir: resolve(input.cwd, name),
-        framework,
-        layout,
-        features,
-        packageManager,
-        install,
-        git,
-      });
-
-      if (!parsed.success) {
-        throw new InvalidConfig({
-          issues: parsed.error.issues.map(
-            (i) => `${i.path.join(".")}: ${i.message}`
-          ),
-        });
-      }
-
-      // Touch the variant id at validation time so we fail early with a clear
-      // message if the chosen combo isn't yet shipped.
-      variantIdFor(parsed.data.framework, parsed.data.layout);
-      return parsed.data;
+      return {
+        name: guard(answers.name, "name"),
+        framework: guard(answers.framework, "framework"),
+        layout: guard(answers.layout, "layout"),
+        featuresRaw: guard(answers.features, "features") ?? [],
+        packageManager: guard(answers.packageManager, "packageManager"),
+        install: guard(answers.install, "install"),
+        git: guard(answers.git, "git"),
+      };
     },
     catch: (cause) => {
       if (cause instanceof UserCancelled) return cause;
-      if (cause instanceof InvalidConfig) return cause;
       if (cause instanceof TargetDirNotEmpty) return cause;
       return new WizardError({ cause });
     },
+  });
+
+const promptShadcnPreset = (
+  fromFlag: string | undefined
+): Effect.Effect<string, UserCancelled | WizardError> =>
+  Effect.tryPromise({
+    try: async () => {
+      if (fromFlag !== undefined) return extractPresetCode(fromFlag);
+      const choice = guard(
+        await select<"default" | "custom">({
+          message: "shadcn preset",
+          options: [
+            {
+              value: "default",
+              label:
+                "Default — base style + lyra theme + phosphor icons (neutral)",
+            },
+            {
+              value: "custom",
+              label: "Custom — paste a code from https://ui.shadcn.com/create",
+            },
+          ],
+          initialValue: "default",
+        }),
+        "shadcnPreset"
+      );
+      if (choice === "default") return DEFAULT_SHADCN_PRESET;
+      const raw = guard(
+        await text({
+          message: "shadcn preset",
+          placeholder:
+            "paste from shadcn — code, --preset code, or full command",
+          validate: (v) => {
+            if (!v || v.trim().length === 0) return "Required.";
+            const code = extractPresetCode(v);
+            if (!/^[A-Za-z0-9_-]+$/u.test(code)) {
+              return "Couldn't find a preset code. Paste the snippet shadcn shows, or just the code.";
+            }
+            return undefined;
+          },
+        }),
+        "shadcnPreset"
+      );
+      return extractPresetCode(raw);
+    },
+    catch: (cause) => {
+      if (cause instanceof UserCancelled) return cause;
+      return new WizardError({ cause });
+    },
+  });
+
+/**
+ * Fetch the live registry list, then run the components prompt.
+ * Falls back to a hardcoded baseline on network failure (with a `note(...)`
+ * so the user knows the picker isn't exhaustive).
+ */
+const promptShadcnComponents = (
+  fromFlag: ReadonlyArray<string> | undefined
+): Effect.Effect<
+  ReadonlyArray<string>,
+  UserCancelled | WizardError,
+  ShadcnRegistry
+> =>
+  Effect.gen(function* () {
+    if (fromFlag !== undefined) return fromFlag;
+
+    const registry = yield* ShadcnRegistry;
+    const names = yield* registry.fetchComponentNames().pipe(
+      Effect.catchTag("NetworkError", () =>
+        Effect.sync(() => {
+          note(
+            "Couldn't reach the shadcn registry; showing a small built-in list.\nYou can re-run with --shadcn-components all to install everything later.",
+            "shadcn"
+          );
+          return FALLBACK_SHADCN_COMPONENTS;
+        })
+      )
+    );
+
+    return yield* Effect.tryPromise({
+      try: async () => {
+        const choice = guard(
+          await select<"all" | "select" | "none">({
+            message: "Components to install",
+            options: [
+              { value: "all", label: "All — install every primitive" },
+              {
+                value: "select",
+                label: "Select — pick from the registry",
+              },
+              {
+                value: "none",
+                label: "None — just init, I'll add components later",
+              },
+            ],
+            initialValue: "select",
+          }),
+          "shadcnComponents"
+        );
+        if (choice === "all") return [SHADCN_ALL_COMPONENTS];
+        if (choice === "none") return [];
+
+        // `@clack/core` natively binds `a` to toggleAll() on multiselect —
+        // first press selects all, second clears, and it never submits. We
+        // advertise that in the message since clack doesn't render a hint.
+        const selected = guard(
+          await multiselect<string>({
+            message: `Choose components (${names.length} available — press 'a' to toggle all, space to toggle one, enter to confirm)`,
+            options: names.map((n) => ({ value: n, label: n })),
+            required: false,
+          }),
+          "shadcnComponents"
+        );
+        return selected;
+      },
+      catch: (cause) => {
+        if (cause instanceof UserCancelled) return cause;
+        return new WizardError({ cause });
+      },
+    });
+  });
+
+export const runWizard = (
+  input: WizardInput
+): Effect.Effect<
+  ProjectConfig,
+  UserCancelled | InvalidConfig | TargetDirNotEmpty | WizardError,
+  ShadcnRegistry
+> =>
+  Effect.gen(function* () {
+    const main = yield* runMainGroup(input);
+
+    // Passing `--shadcn-preset` or `--shadcn-components` is a strong signal
+    // the user wants shadcn even if they didn't list it via `--features`.
+    const shadcnImpliedByFlag =
+      input.shadcnPreset !== undefined || input.shadcnComponents !== undefined;
+    const featuresWithShadcn =
+      shadcnImpliedByFlag && !main.featuresRaw.includes("shadcn")
+        ? [...main.featuresRaw, "shadcn" as FeatureT]
+        : main.featuresRaw;
+
+    // Expand feature requires from each feature's compatibility declaration
+    // so e.g. better-auth pulls in convex + shadcn automatically.
+    const features = expandFeatureRequires(featuresWithShadcn);
+
+    let shadcn: ShadcnConfig | undefined;
+    if (features.includes("shadcn")) {
+      const preset = yield* promptShadcnPreset(input.shadcnPreset);
+      const components = yield* promptShadcnComponents(input.shadcnComponents);
+      shadcn = { preset, components: [...components] };
+    }
+
+    const parsed = ProjectConfig.safeParse({
+      name: main.name,
+      targetDir: resolve(input.cwd, main.name),
+      framework: main.framework,
+      layout: main.layout,
+      features,
+      shadcn,
+      packageManager: main.packageManager,
+      install: main.install,
+      git: main.git,
+    });
+
+    if (!parsed.success) {
+      return yield* new InvalidConfig({
+        issues: parsed.error.issues.map(
+          (i) => `${i.path.join(".")}: ${i.message}`
+        ),
+      });
+    }
+
+    // Touch the variant id at validation time so we fail early with a clear
+    // message if the chosen combo isn't yet shipped.
+    variantIdFor(parsed.data.framework, parsed.data.layout);
+    return parsed.data;
   });
 
 export { Framework, Layout, Feature, PackageManager };

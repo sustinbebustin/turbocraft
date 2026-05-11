@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+{{#if withShadcn}}
 import { Button } from "@workspace/ui/components/button";
+{{/if}}
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -12,11 +14,15 @@ function HomePage() {
         <div>
           <h1 className="font-medium">{{projectName}} ready!</h1>
           <p>You may now add components and start building.</p>
+{{#if withShadcn}}
           <Button className="mt-2">Button</Button>
+{{/if}}
         </div>
+{{#if withShadcn}}
         <div className="font-mono text-xs text-muted-foreground">
           (Press <kbd>d</kbd> to toggle dark mode)
         </div>
+{{/if}}
       </div>
     </div>
   );

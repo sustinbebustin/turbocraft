@@ -5,7 +5,7 @@ files are not shipped with the published npm package — they live here for
 contributors and for users who want a deeper reference than the root
 `README.md` provides.
 
-## If you want to *use* the CLI
+## If you want to _use_ the CLI
 
 Start here:
 
@@ -17,7 +17,7 @@ Start here:
 - [Troubleshooting](guides/troubleshooting.md) — common errors, `doctor`,
   Node and package-manager requirements.
 
-## If you want to *understand* the repo
+## If you want to _understand_ the repo
 
 - [Architecture overview](architecture/overview.md) — monorepo layout,
   package boundaries, what's published vs internal.
@@ -31,7 +31,7 @@ Start here:
   what gets inlined into the published bundle, the templates-resolution
   trick.
 
-## If you want to *contribute*
+## If you want to _contribute_
 
 - [Development](contributing/development.md) — local commands, repo
   conventions.
@@ -49,6 +49,6 @@ Start here:
 - All paths in these docs are relative to the repo root unless prefixed with
   `<output>/`, which means "inside a scaffolded project."
 - Code references use `path/to/file.ts:line` so they're navigable.
-- `@turbocraft/core` and `@turbocraft/templates` are *internal* workspace
+- `@turbocraft/core` and `@turbocraft/templates` are _internal_ workspace
   packages — they have no published versions and should not be referenced
   by external consumers.

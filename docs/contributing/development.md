@@ -22,15 +22,15 @@ pnpm install
 All commands are run from the repo root unless noted. Turbo handles the
 fan-out across packages.
 
-| Command            | What it does                                                |
-|--------------------|-------------------------------------------------------------|
-| `pnpm build`       | Build every package via tsdown.                             |
-| `pnpm dev`         | Watch-rebuild every package.                                |
-| `pnpm typecheck`   | `tsc --noEmit` everywhere (after Effect LS patch).          |
-| `pnpm test`        | Vitest across all packages.                                 |
-| `pnpm lint`        | oxlint at the repo root.                                    |
-| `pnpm format`      | oxfmt check (`--disable-nested-config`).                    |
-| `pnpm format:fix`  | oxfmt write.                                                |
+| Command           | What it does                                       |
+| ----------------- | -------------------------------------------------- |
+| `pnpm build`      | Build every package via tsdown.                    |
+| `pnpm dev`        | Watch-rebuild every package.                       |
+| `pnpm typecheck`  | `tsc --noEmit` everywhere (after Effect LS patch). |
+| `pnpm test`       | Vitest across all packages.                        |
+| `pnpm lint`       | oxlint at the repo root.                           |
+| `pnpm format`     | oxfmt check (`--disable-nested-config`).           |
+| `pnpm format:fix` | oxfmt write.                                       |
 
 ## Smoke-testing the CLI
 
@@ -93,7 +93,7 @@ in `apps/cli` or `@turbocraft/templates` instead.
 - No `any`, no `!`, no unsafe assertions. Parse at boundaries.
 - Module structure: small modules around one primary domain type.
   Domain logic lives on the module of its primary type.
-- Comments explain *why*, never *what*. Doc comments on exported APIs
+- Comments explain _why_, never _what_. Doc comments on exported APIs
   only when the name and signature don't already make it obvious.
 
 ## Editor setup

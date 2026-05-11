@@ -1,6 +1,6 @@
 # Adding a feature
 
-A *feature* is an opt-in layer applied after a variant's base layers. The
+A _feature_ is an opt-in layer applied after a variant's base layers. The
 repo currently ships two:
 
 - `convex` — Convex backend wiring.
@@ -69,15 +69,15 @@ single-app variants use full version pins.
 ```jsonc
 {
   "dependencies": {
-    "drizzle-orm": "catalog:"
+    "drizzle-orm": "catalog:",
   },
   "devDependencies": {
-    "drizzle-kit": "catalog:"
+    "drizzle-kit": "catalog:",
   },
   "scripts": {
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
-  }
+    "db:studio": "drizzle-kit studio",
+  },
 }
 ```
 
@@ -93,11 +93,11 @@ for merge semantics.
 import type { FeatureCompatibility } from "@turbocraft/core";
 
 export const compatibility: FeatureCompatibility = {
-  requires: ["convex"],   // or [] if standalone
+  requires: ["convex"], // or [] if standalone
 };
 ```
 
-This is the *primary* source of truth for inter-feature deps. The wizard
+This is the _primary_ source of truth for inter-feature deps. The wizard
 loads it via `loadCompatibility()` and prevents inconsistent combinations
 without any CLI code changes.
 

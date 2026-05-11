@@ -5,12 +5,12 @@
 
 ## Variants
 
-| Variant id          | Framework      | Layout    | Description                                            |
-|---------------------|----------------|-----------|--------------------------------------------------------|
-| `nextjs-monorepo`   | Next.js 16     | Monorepo  | `apps/web` + `packages/{ui,shared,typescript-config}`. |
-| `nextjs-single`     | Next.js 16     | Single    | Standalone Next.js app, no workspaces.                 |
-| `tanstack-monorepo` | TanStack Start | Monorepo  | `apps/web` + shared packages.                          |
-| `tanstack-single`   | TanStack Start | Single    | Standalone TanStack Start app.                         |
+| Variant id          | Framework      | Layout   | Description                                            |
+| ------------------- | -------------- | -------- | ------------------------------------------------------ |
+| `nextjs-monorepo`   | Next.js 16     | Monorepo | `apps/web` + `packages/{ui,shared,typescript-config}`. |
+| `nextjs-single`     | Next.js 16     | Single   | Standalone Next.js app, no workspaces.                 |
+| `tanstack-monorepo` | TanStack Start | Monorepo | `apps/web` + shared packages.                          |
+| `tanstack-single`   | TanStack Start | Single   | Standalone TanStack Start app.                         |
 
 A variant id is derived from `framework` + `layout`. See
 [`variantIdFor()`](../../packages/core/src/schema.ts).
@@ -27,20 +27,20 @@ Regardless of framework or layout:
 - **Vitest 4** with the jsdom environment.
 - **oxlint** + **oxfmt** for linting and formatting (no ESLint/Prettier).
 - **knip** for dead-code detection.
-- **shadcn/ui** (56 prebuilt components) on top of **Tailwind 4**.
-- **Phosphor Icons** as the default icon set.
+- **Tailwind 4** for styling.
 - **Effect.ts** with the `@effect/language-service` typecheck patch wired
   into the project's `typecheck` script.
 
 ## Optional features
 
-Features are opt-in layers applied *after* the base variant. Enable them
+Features are opt-in layers applied _after_ the base variant. Enable them
 with `--features convex,better-auth` or via the wizard.
 
-| Feature       | What it adds                                                                  | Requires           |
-|---------------|-------------------------------------------------------------------------------|--------------------|
-| `convex`      | `convex/` schema dir, client wiring, scripts, dependency entries.             | —                  |
-| `better-auth` | Auth providers, client, route handlers, env scaffolding.                      | `convex`           |
+| Feature       | What it adds                                                                                                                                              | Requires           |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `shadcn`      | `components.json`, `lib/utils.ts`, theme provider, Toaster wiring; runs `shadcn init` post-install. Choose preset + which components to install (or all). | —                  |
+| `convex`      | `convex/` schema dir, client wiring, scripts, dependency entries.                                                                                         | —                  |
+| `better-auth` | Auth providers, client, route handlers, env scaffolding.                                                                                                  | `shadcn`, `convex` |
 
 Compatibility is declared per-feature in
 [`packages/templates/src/features/<id>/compatibility.ts`](../../packages/templates/src/features/)
@@ -56,9 +56,9 @@ variant that doesn't support a feature, just omit it from that array.
 ## Picking a variant
 
 - **Building a single product, want to scale later?** Start with the
-  monorepo variant for your preferred framework. The shared `packages/ui`
-  and `packages/shared` workspaces give you a place to extract code without
-  retrofitting.
+  monorepo variant for your preferred framework. The shared `packages/shared`
+  workspace gives you a place to extract code without retrofitting; opting
+  in to `shadcn` adds a `packages/ui` workspace for shared components.
 - **Quick prototype, single deployable?** Pick the single-app variant. You
   can always migrate later by hoisting code into a fresh monorepo scaffold.
 - **Next.js vs TanStack Start?** Next.js is the better-trodden path with

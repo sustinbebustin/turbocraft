@@ -45,12 +45,15 @@ export class FileSystemService extends Context.Tag("FileSystemService")<
   FileSystemService,
   {
     readonly readFile: (path: string) => Effect.Effect<string, FsError>;
-    readonly writeFile: (path: string, body: string) => Effect.Effect<void, FsError>;
+    readonly writeFile: (
+      path: string,
+      body: string
+    ) => Effect.Effect<void, FsError>;
     // ...
   }
 >() {}
 
-export const FileSystemLive = Layer.succeed(FileSystemService, /* impl */);
+export const FileSystemLive = Layer.succeed(FileSystemService /* impl */);
 ```
 
 Commands compose all five services into a single layer at the top of
@@ -65,10 +68,10 @@ Effect.provide(
     PlopLive,
     TemplatesLive
   )
-)
+);
 ```
 
-The orchestrator (`scaffold()`) requires the *union* of all five service
+The orchestrator (`scaffold()`) requires the _union_ of all five service
 tags; operations require only the subset they actually use. Adding a new
 operation: declare the services it needs in its `Effect.Effect<..., R>`
 signature; the type system enforces the layer is provided.
@@ -82,7 +85,7 @@ Subcommands are `defineCommand({ meta, args, run })`:
 - `run` — async function receiving parsed `{ args, rawArgs }`.
 
 Boundary parsing pattern: re-parse enum-typed strings through Zod
-*inside* `run`, so the CLI surface stays loose (strings) while the
+_inside_ `run`, so the CLI surface stays loose (strings) while the
 internal model is exact. See `parseFeatures()` in `create.ts`.
 
 ## Wizard flow
@@ -133,7 +136,7 @@ colour usage stays consistent and disable-able from one spot.
 
 The trickiest service is `Templates`. In source mode (vitest / tsx) the
 template tree lives at `packages/templates/src/`. In the published CLI it
-ships *inside* `apps/cli/templates/` (copied by
+ships _inside_ `apps/cli/templates/` (copied by
 [`apps/cli/scripts/copy-templates.mjs`](../../apps/cli/scripts/copy-templates.mjs)
 at build time, listed in the package's `files` whitelist).
 

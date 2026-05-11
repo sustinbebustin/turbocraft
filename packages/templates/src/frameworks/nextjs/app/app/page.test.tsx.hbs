@@ -1,0 +1,20 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import Page from "./page";
+
+describe("Page", () => {
+  it("renders the heading", () => {
+    render(<Page />);
+    expect(
+      screen.getByRole("heading", { name: /project ready/i })
+    ).toBeInTheDocument();
+  });
+
+{{#if withShadcn}}
+  it("renders the button", () => {
+    render(<Page />);
+    expect(screen.getByRole("button", { name: /button/i })).toBeInTheDocument();
+  });
+{{/if}}
+});

@@ -39,12 +39,12 @@ pnpm dlx turbocraft create my-app \
 
 ## Variants
 
-| ID                  | Stack                                       |
-|---------------------|---------------------------------------------|
+| ID                  | Stack                                             |
+| ------------------- | ------------------------------------------------- |
 | `nextjs-monorepo`   | Next.js 16 in a Turborepo (`apps/` + `packages/`) |
-| `nextjs`            | Next.js 16, single app                      |
-| `tanstack-monorepo` | TanStack Start in a Turborepo               |
-| `tanstack`          | TanStack Start, single app                  |
+| `nextjs`            | Next.js 16, single app                            |
+| `tanstack-monorepo` | TanStack Start in a Turborepo                     |
+| `tanstack`          | TanStack Start, single app                        |
 
 Every variant ships the same hand-tuned toolchain:
 
@@ -56,11 +56,11 @@ Every variant ships the same hand-tuned toolchain:
 
 ## Commands
 
-| Command                        | What it does                                                |
-|--------------------------------|-------------------------------------------------------------|
-| `turbocraft create <name>`     | Scaffold a new project (interactive wizard by default).     |
-| `turbocraft add <kind>`        | Run a generator inside a turbocraft project (e.g. `app`, `page`). |
-| `turbocraft doctor`            | Diagnose a turbocraft project's environment.                |
+| Command                    | What it does                                                      |
+| -------------------------- | ----------------------------------------------------------------- |
+| `turbocraft create <name>` | Scaffold a new project (interactive wizard by default).           |
+| `turbocraft add <kind>`    | Run a generator inside a turbocraft project (e.g. `app`, `page`). |
+| `turbocraft doctor`        | Diagnose a turbocraft project's environment.                      |
 
 See [docs/guides/cli-reference.md](docs/guides/cli-reference.md) for every flag.
 

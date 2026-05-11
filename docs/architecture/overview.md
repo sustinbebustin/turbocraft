@@ -47,7 +47,7 @@ turbocraft/
   for `Framework`, `Layout`, `Feature`, `ProjectConfig`; the
   `TemplateManifest` and `FeatureCompatibility` types; error tags; the
   `GeneratorRunner` contract.
-- `@turbocraft/templates` is *only* assets + manifest data. It imports
+- `@turbocraft/templates` is _only_ assets + manifest data. It imports
   types from core and exports the variant registry plus the
   `templatesRoot()` resolver.
 - `apps/cli` is the user-facing entrypoint. It composes Effect services
@@ -58,10 +58,10 @@ turbocraft/
 
 Only **two** packages ship to npm:
 
-| Package             | Purpose                                                     |
-|---------------------|-------------------------------------------------------------|
-| `turbocraft`        | The CLI. Self-contained — workspace deps are inlined.       |
-| `create-turbocraft` | npm-`create` shim that re-execs `turbocraft create`.        |
+| Package             | Purpose                                               |
+| ------------------- | ----------------------------------------------------- |
+| `turbocraft`        | The CLI. Self-contained — workspace deps are inlined. |
+| `create-turbocraft` | npm-`create` shim that re-execs `turbocraft create`.  |
 
 `@turbocraft/core`, `@turbocraft/templates`, and
 `@workspace/typescript-config` are **private workspaces**: their code is

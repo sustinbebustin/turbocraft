@@ -1,7 +1,7 @@
 # Templates system
 
 The template tree under [`packages/templates/src/`](../../packages/templates/src/)
-is the *only* place where output assets live. A variant is just a manifest
+is the _only_ place where output assets live. A variant is just a manifest
 that declares which subtrees to overlay, in what order, into the target
 directory.
 
@@ -30,6 +30,10 @@ packages/templates/src/
       tanstack/files/        TanStack-specific feature files.
       tanstack/deps/...
     better-auth/             Same shape as convex.
+    shadcn/                  components.json + lib/utils.ts + theme provider.
+                             monorepo subtree ships a packages/ui workspace
+                             skeleton so `shadcn init --monorepo` can populate
+                             it post-install.
   variants/
     nextjs-monorepo.ts       Manifests that compose the above into one
     nextjs-single.ts         scaffold.
@@ -44,8 +48,8 @@ From [`packages/core/src/manifest.ts`](../../packages/core/src/manifest.ts):
 
 ```ts
 type CopyEntry = {
-  readonly from: string;  // path relative to templates root
-  readonly to:   string;  // path inside the generated project ("." = root)
+  readonly from: string; // path relative to templates root
+  readonly to: string; // path inside the generated project ("." = root)
 };
 
 type TemplateManifest = {
@@ -54,7 +58,10 @@ type TemplateManifest = {
   readonly featureLayers?: Readonly<
     Partial<Record<Feature, ReadonlyArray<CopyEntry>>>
   >;
-  readonly generators?: { readonly source: string; readonly destination: string };
+  readonly generators?: {
+    readonly source: string;
+    readonly destination: string;
+  };
   readonly initialGenerators: ReadonlyArray<GeneratorRef>;
   readonly supportedFeatures: ReadonlyArray<Feature>;
 };
@@ -66,23 +73,31 @@ A real example — [`variants/nextjs-monorepo.ts`](../../packages/templates/src/
 export const manifest: TemplateManifest = {
   id: "nextjs-monorepo",
   layers: [
-    { from: "shared/monorepo",            to: "." },
+    { from: "shared/monorepo", to: "." },
     { from: "frameworks/nextjs/monorepo", to: "." },
   ],
   featureLayers: {
+    shadcn: [
+      { from: "features/shadcn/monorepo/shared", to: "." },
+      { from: "features/shadcn/deps/monorepo-app", to: "apps/web" },
+      { from: "features/shadcn/nextjs/files", to: "apps/web" },
+    ],
     convex: [
-      { from: "features/convex/files",          to: "apps/web" },
-      { from: "features/convex/deps/monorepo",  to: "apps/web" },
-      { from: "features/convex/nextjs/files",   to: "apps/web" },
+      { from: "features/convex/files", to: "apps/web" },
+      { from: "features/convex/deps/monorepo", to: "apps/web" },
+      { from: "features/convex/nextjs/files", to: "apps/web" },
     ],
     "better-auth": [
       { from: "features/better-auth/deps/monorepo", to: "apps/web" },
-      { from: "features/better-auth/nextjs/files",  to: "apps/web" },
+      { from: "features/better-auth/nextjs/files", to: "apps/web" },
     ],
   },
-  generators: { source: "frameworks/nextjs/generators", destination: "turbo/generators" },
+  generators: {
+    source: "frameworks/nextjs/generators",
+    destination: "turbo/generators",
+  },
   initialGenerators: [],
-  supportedFeatures: ["convex", "better-auth"],
+  supportedFeatures: ["shadcn", "convex", "better-auth"],
 };
 ```
 
@@ -91,11 +106,11 @@ export const manifest: TemplateManifest = {
 The scaffolder walks each layer's `from` directory recursively and processes
 files according to suffix:
 
-| Suffix         | Behaviour                                                       |
-|----------------|-----------------------------------------------------------------|
-| `*.hbs`        | Compile with Handlebars, write to dest without the `.hbs` ext.  |
-| `*.merge.json` | Parse as JSON, deep-merge into an accumulator keyed by dest.    |
-| (anything else)| Copy verbatim, overwriting existing dest if any.                |
+| Suffix          | Behaviour                                                      |
+| --------------- | -------------------------------------------------------------- |
+| `*.hbs`         | Compile with Handlebars, write to dest without the `.hbs` ext. |
+| `*.merge.json`  | Parse as JSON, deep-merge into an accumulator keyed by dest.   |
+| (anything else) | Copy verbatim, overwriting existing dest if any.               |
 
 ### Handlebars context
 
@@ -106,8 +121,13 @@ Every `.hbs` file is rendered with the same answer bag:
   projectName:    string,    // e.g. "my-app"
   withConvex:     boolean,   // convex feature enabled
   withBetterAuth: boolean,   // better-auth feature enabled
+  withShadcn:     boolean,   // shadcn feature enabled
 }
 ```
+
+When `withShadcn` is false, layout/root templates inline a plain
+`className` string and skip Toaster/ThemeProvider/cn imports so the
+project compiles without any shadcn-only dependency.
 
 Helpers come from
 [`packages/core/src/handlebars-helpers.ts`](../../packages/core/src/handlebars-helpers.ts)
@@ -115,7 +135,7 @@ and are registered on a private Handlebars instance per scaffold run (so
 they don't leak globally).
 
 > Plop generators use the wider answer bag declared by the generator
-> itself; the three keys above are *also* merged in, so generator templates
+> itself; the three keys above are _also_ merged in, so generator templates
 > can reference `projectName` etc.
 
 ### Deep-merge rules
@@ -151,7 +171,7 @@ own working `turbo gen run app` / `turbo gen run page`. `turbocraft add`
 is a thin wrapper over the same generators.
 
 `initialGenerators` is currently **empty for every variant**. The project
-is materialised entirely by layers; generators are for *extending* the
+is materialised entirely by layers; generators are for _extending_ the
 project post-scaffold.
 
 ## Compatibility metadata
@@ -159,7 +179,7 @@ project post-scaffold.
 ```ts
 // packages/templates/src/features/better-auth/compatibility.ts
 export const compatibility: FeatureCompatibility = {
-  requires: ["convex"],
+  requires: ["shadcn", "convex"],
 };
 ```
 

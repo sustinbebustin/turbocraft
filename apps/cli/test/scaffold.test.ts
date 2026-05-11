@@ -63,7 +63,6 @@ describe("scaffold nextjs-monorepo (default options)", () => {
       "apps/web/package.json",
       "apps/web/app/page.tsx",
       "apps/web/app/layout.tsx",
-      "packages/ui/package.json",
       "packages/typescript-config/base.json",
       "turbo/generators/config.ts",
       "turbo/generators/templates/app/package.json.hbs",
@@ -173,7 +172,8 @@ describe("scaffold tanstack-monorepo with convex + better-auth", () => {
       targetDir: target,
       framework: "tanstack",
       layout: "monorepo",
-      features: ["convex", "better-auth"],
+      features: ["shadcn", "convex", "better-auth"],
+      shadcn: { preset: "default", components: [] },
       packageManager: "pnpm",
       install: false,
       git: false,
@@ -243,7 +243,6 @@ describe("scaffold nextjs-single (no features)", () => {
       "tsconfig.json",
       "app/page.tsx",
       "app/layout.tsx",
-      "components/theme-provider.tsx",
       ".oxlintrc.json",
       "vitest.config.ts",
     ]) {
@@ -252,6 +251,13 @@ describe("scaffold nextjs-single (no features)", () => {
     // Single-app projects are not turborepos.
     expect(existsSync(join(target, "turbo/generators"))).toBe(false);
     expect(existsSync(join(target, "pnpm-workspace.yaml"))).toBe(false);
+
+    // shadcn opt-out: no theme-provider, no components.json, no shadcn deps.
+    expect(existsSync(join(target, "components/theme-provider.tsx"))).toBe(
+      false
+    );
+    expect(existsSync(join(target, "components.json"))).toBe(false);
+    expect(existsSync(join(target, "components/ui"))).toBe(false);
 
     // Feature opt-out: no convex/, no better-auth files, no feature deps.
     expect(existsSync(join(target, "convex"))).toBe(false);
@@ -297,7 +303,8 @@ describe("scaffold nextjs-single with convex + better-auth", () => {
       targetDir: target,
       framework: "nextjs",
       layout: "single",
-      features: ["convex", "better-auth"],
+      features: ["shadcn", "convex", "better-auth"],
+      shadcn: { preset: "default", components: [] },
       packageManager: "pnpm",
       install: false,
       git: false,
@@ -372,7 +379,6 @@ describe("scaffold tanstack-single (no features)", () => {
       "src/router.tsx",
       "src/routes/__root.tsx",
       "src/routes/index.tsx",
-      "src/components/theme-provider.tsx",
       ".oxlintrc.json",
       "vitest.config.ts",
     ]) {
@@ -380,6 +386,13 @@ describe("scaffold tanstack-single (no features)", () => {
     }
     expect(existsSync(join(target, "turbo/generators"))).toBe(false);
     expect(existsSync(join(target, "pnpm-workspace.yaml"))).toBe(false);
+
+    // shadcn opt-out: no theme-provider, no components.json, no shadcn deps.
+    expect(existsSync(join(target, "src/components/theme-provider.tsx"))).toBe(
+      false
+    );
+    expect(existsSync(join(target, "components.json"))).toBe(false);
+    expect(existsSync(join(target, "src/components/ui"))).toBe(false);
 
     // Feature opt-out
     expect(existsSync(join(target, "convex"))).toBe(false);
@@ -430,7 +443,8 @@ describe("scaffold tanstack-single with convex + better-auth", () => {
       targetDir: target,
       framework: "tanstack",
       layout: "single",
-      features: ["convex", "better-auth"],
+      features: ["shadcn", "convex", "better-auth"],
+      shadcn: { preset: "default", components: [] },
       packageManager: "pnpm",
       install: false,
       git: false,
@@ -491,7 +505,8 @@ describe("scaffold nextjs-monorepo with convex + better-auth", () => {
       targetDir: target,
       framework: "nextjs",
       layout: "monorepo",
-      features: ["convex", "better-auth"],
+      features: ["shadcn", "convex", "better-auth"],
+      shadcn: { preset: "default", components: [] },
       packageManager: "pnpm",
       install: false,
       git: false,
