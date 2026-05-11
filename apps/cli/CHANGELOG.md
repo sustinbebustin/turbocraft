@@ -1,5 +1,11 @@
 # turbocraft
 
+## 0.3.1
+
+### Patch Changes
+
+- a43805a: Improve CLI error handling with structured error messages and automatic cleanup of partial scaffolds on failure.
+
 ## 0.3.0
 
 ### Minor Changes
