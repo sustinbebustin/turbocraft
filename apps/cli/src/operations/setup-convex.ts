@@ -127,8 +127,9 @@ const writeSiteUrl = (
  * Run a one-time Convex setup after dependencies are installed:
  *
  *   1. Seed `.env.local` from `.env.example` (idempotent).
- *   2. `convex dev --once --configure new` — interactive: opens browser for
- *      login on first run, creates a deployment, writes CONVEX_DEPLOYMENT
+ *   2. `convex dev --once` — interactive. Convex itself prompts the user to
+ *      choose "Start without an account (local)" vs "Login or create an
+ *      account"; only the latter opens a browser. Writes CONVEX_DEPLOYMENT
  *      and the framework's CONVEX_URL into `.env.local`, runs codegen.
  *   3. Derive *_CONVEX_SITE_URL from the URL and append it to `.env.local`.
  *   4. If better-auth: generate a base64 secret and `convex env set` it.
@@ -160,7 +161,7 @@ export const setupConvex = (
     yield* seedEnvLocal(convexCwd).pipe(Effect.ignore);
 
     const configured = yield* proc
-      .run(bin, ["dev", "--once", "--configure", "new"], {
+      .run(bin, ["dev", "--once"], {
         cwd: convexCwd,
         interactive: true,
       })
