@@ -15,14 +15,12 @@ import type { CopyEntry, Feature, TemplateManifest } from "@turbocraft/core";
 import { handlebarsHelpers } from "@turbocraft/core";
 import { TemplatesService } from "../services/Templates.ts";
 import { FileSystemService } from "../services/FileSystem.ts";
-import { FsError } from "../domain/errors.ts";
+import { FsError, PathEscape, MergeParseError } from "../domain/errors.ts";
 
 export type SeedInput = {
   readonly manifest: TemplateManifest;
   readonly targetDir: string;
-  /** Features enabled by the user; controls which feature-layers apply. */
   readonly features: ReadonlyArray<Feature>;
-  /** Bag of values available to `*.hbs` files and merge templating. */
   readonly answers: Readonly<Record<string, unknown>>;
 };
 
@@ -41,11 +39,6 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   !Array.isArray(value) &&
   Object.getPrototypeOf(value) === Object.prototype;
 
-/**
- * Deep-merge JSON-compatible values. Arrays concatenate (with primitive
- * dedupe). Objects merge recursively. Primitives / mismatched types: later
- * wins. This is the semantics used for `*.merge.json` layer files.
- */
 const deepMerge = (a: unknown, b: unknown): unknown => {
   if (Array.isArray(a) && Array.isArray(b)) {
     const out: Array<unknown> = [...a];
@@ -78,9 +71,7 @@ const render = (
 ): string => hbs.compile(source, { noEscape: true })(answers);
 
 type DirEntry = {
-  /** Absolute path of the source entry. */
   readonly src: string;
-  /** Path relative to the layer's `from` root. */
   readonly rel: string;
   readonly kind: "file" | "directory" | "symlink";
 };
@@ -97,8 +88,6 @@ const walkLayer = async (root: string): Promise<ReadonlyArray<DirEntry>> => {
     const src = join(entry.parentPath, entry.name);
     const rel = relative(root, src);
     if (rel === "" || rel.startsWith("..")) continue;
-    // `readdir({recursive:true})` returns every descendant, so a `node_modules`
-    // anywhere in the path (not just top-level) must be skipped.
     if (rel.split(/[\\/]/u).includes("node_modules")) continue;
     if (entry.isSymbolicLink()) {
       result.push({ src, rel, kind: "symlink" });
@@ -115,135 +104,188 @@ type ApplyContext = {
   readonly templatesRoot: string;
   readonly targetDir: string;
   readonly answers: Readonly<Record<string, unknown>>;
-  /** Accumulators for `*.merge.json` files, keyed by absolute destination path. */
   readonly mergeAcc: Map<string, unknown>;
-  /** Track which paths the scaffolder wrote (for the report). */
   readonly emitted: Set<string>;
 };
 
-const assertContained = (parent: string, child: string, label: string) => {
+const assertContained = (
+  parent: string,
+  child: string,
+  label: string
+): Effect.Effect<void, PathEscape> => {
   const p = resolve(parent);
   const c = resolve(child);
   if (c !== p && !c.startsWith(p + sep)) {
-    throw new Error(
-      `${label}: resolved path '${c}' escapes '${p}'. Refusing to continue.`
-    );
+    return Effect.fail(new PathEscape({ label, parent: p, child: c }));
   }
+  return Effect.void;
 };
 
-const applyEntry = async (
+const applyEntryEffect = (
   layer: CopyEntry,
   entry: DirEntry,
   ctx: ApplyContext
-): Promise<void> => {
-  const destBase = resolve(ctx.targetDir, layer.to);
-  assertContained(ctx.targetDir, destBase, "layer.to");
-  let destRel = entry.rel;
+): Effect.Effect<void, FsError | PathEscape | MergeParseError> =>
+  Effect.gen(function* () {
+    const destBase = resolve(ctx.targetDir, layer.to);
+    yield* assertContained(ctx.targetDir, destBase, "layer.to");
+    let destRel = entry.rel;
 
-  // Strip the `.hbs` suffix from the destination so the output reads as the
-  // logical target (e.g., `package.json.hbs` -> `package.json`).
-  const isHbs = destRel.endsWith(HBS_SUFFIX);
-  if (isHbs) destRel = destRel.slice(0, -HBS_SUFFIX.length);
+    const isHbs = destRel.endsWith(HBS_SUFFIX);
+    if (isHbs) destRel = destRel.slice(0, -HBS_SUFFIX.length);
 
-  const isMerge = destRel.endsWith(MERGE_SUFFIX);
-  if (isMerge) {
-    // `package.json.merge.json` -> accumulator key `package.json`.
-    destRel = destRel.slice(0, -MERGE_SUFFIX.length);
-  }
-
-  const destAbs = resolve(destBase, destRel);
-  assertContained(ctx.targetDir, destAbs, "destination");
-
-  if (entry.kind === "directory") {
-    await fsMkdir(destAbs, { recursive: true });
-    return;
-  }
-
-  await fsMkdir(dirname(destAbs), { recursive: true });
-
-  if (entry.kind === "symlink") {
-    const target = await fsReadlink(entry.src);
-    // Refuse symlinks that resolve outside the target tree (e.g. absolute
-    // paths, or `..` traversals). Templates today ship relative-within-tree
-    // links only; this is defense-in-depth against a hostile template.
-    const resolvedTarget = resolve(dirname(destAbs), target);
-    assertContained(ctx.targetDir, resolvedTarget, "symlink target");
-    await fsSymlink(target, destAbs).catch(
-      async (err: NodeJS.ErrnoException) => {
-        if (err.code !== "EEXIST") throw err;
-      }
-    );
-    ctx.emitted.add(destAbs);
-    return;
-  }
-
-  if (isMerge) {
-    const raw = await fsReadFile(entry.src, "utf8");
-    const rendered = render(raw, ctx.answers);
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(rendered);
-    } catch (cause) {
-      throw new Error(
-        `Failed to parse merge layer '${entry.src}' as JSON after rendering: ${String(cause)}`
-      );
+    const isMerge = destRel.endsWith(MERGE_SUFFIX);
+    if (isMerge) {
+      destRel = destRel.slice(0, -MERGE_SUFFIX.length);
     }
-    const previous = ctx.mergeAcc.get(destAbs);
-    ctx.mergeAcc.set(
-      destAbs,
-      previous === undefined ? parsed : deepMerge(previous, parsed)
-    );
-    return;
-  }
 
-  if (isHbs) {
-    const raw = await fsReadFile(entry.src, "utf8");
-    await fsWriteFile(destAbs, render(raw, ctx.answers), "utf8");
+    const destAbs = resolve(destBase, destRel);
+    yield* assertContained(ctx.targetDir, destAbs, "destination");
+
+    if (entry.kind === "directory") {
+      yield* Effect.tryPromise({
+        try: () => fsMkdir(destAbs, { recursive: true }),
+        catch: (cause) => new FsError({ op: "mkdir", path: destAbs, cause }),
+      });
+      return;
+    }
+
+    yield* Effect.tryPromise({
+      try: () => fsMkdir(dirname(destAbs), { recursive: true }),
+      catch: (cause) =>
+        new FsError({ op: "mkdir", path: dirname(destAbs), cause }),
+    });
+
+    if (entry.kind === "symlink") {
+      const target = yield* Effect.tryPromise({
+        try: () => fsReadlink(entry.src),
+        catch: (cause) =>
+          new FsError({ op: "readlink", path: entry.src, cause }),
+      });
+      const resolvedTarget = resolve(dirname(destAbs), target);
+      yield* assertContained(ctx.targetDir, resolvedTarget, "symlink target");
+      yield* Effect.tryPromise({
+        try: () =>
+          fsSymlink(target, destAbs).catch(
+            (err: NodeJS.ErrnoException) => {
+              if (err.code !== "EEXIST") throw err;
+            }
+          ),
+        catch: (cause) =>
+          new FsError({ op: "symlink", path: destAbs, cause }),
+      });
+      ctx.emitted.add(destAbs);
+      return;
+    }
+
+    if (isMerge) {
+      const raw = yield* Effect.tryPromise({
+        try: () => fsReadFile(entry.src, "utf8"),
+        catch: (cause) =>
+          new FsError({ op: "readFile", path: entry.src, cause }),
+      });
+      const rendered = render(raw, ctx.answers);
+      const parsed = yield* Effect.try({
+        try: () => JSON.parse(rendered) as unknown,
+        catch: (cause) => new MergeParseError({ src: entry.src, cause }),
+      });
+      const previous = ctx.mergeAcc.get(destAbs);
+      ctx.mergeAcc.set(
+        destAbs,
+        previous === undefined ? parsed : deepMerge(previous, parsed)
+      );
+      return;
+    }
+
+    if (isHbs) {
+      const raw = yield* Effect.tryPromise({
+        try: () => fsReadFile(entry.src, "utf8"),
+        catch: (cause) =>
+          new FsError({ op: "readFile", path: entry.src, cause }),
+      });
+      yield* Effect.tryPromise({
+        try: () => fsWriteFile(destAbs, render(raw, ctx.answers), "utf8"),
+        catch: (cause) =>
+          new FsError({ op: "writeFile", path: destAbs, cause }),
+      });
+      ctx.emitted.add(destAbs);
+      return;
+    }
+
+    yield* Effect.tryPromise({
+      try: () => fsCopyFile(entry.src, destAbs),
+      catch: (cause) =>
+        new FsError({ op: "copyFile", path: `${entry.src} -> ${destAbs}`, cause }),
+    });
     ctx.emitted.add(destAbs);
-    return;
-  }
+  });
 
-  await fsCopyFile(entry.src, destAbs);
-  ctx.emitted.add(destAbs);
-};
-
-const applyLayer = async (
+const applyLayerEffect = (
   layer: CopyEntry,
   ctx: ApplyContext
-): Promise<void> => {
-  const absFrom = resolve(ctx.templatesRoot, layer.from);
-  assertContained(ctx.templatesRoot, absFrom, "layer.from");
-  const entries = await walkLayer(absFrom);
-  // Ensure directories come before their children so mkdir order is correct.
-  const sorted = [...entries].sort((a, b) => a.rel.localeCompare(b.rel));
-  for (const entry of sorted) {
-    await applyEntry(layer, entry, ctx);
-  }
-};
+): Effect.Effect<void, FsError | PathEscape | MergeParseError> =>
+  Effect.gen(function* () {
+    const absFrom = resolve(ctx.templatesRoot, layer.from);
+    yield* assertContained(ctx.templatesRoot, absFrom, "layer.from");
+    const entries = yield* Effect.tryPromise({
+      try: () => walkLayer(absFrom),
+      catch: (cause) =>
+        new FsError({ op: "walkLayer", path: absFrom, cause }),
+    });
+    const sorted = [...entries].sort((a, b) => a.rel.localeCompare(b.rel));
+    yield* Effect.forEach(sorted, (entry) => applyEntryEffect(layer, entry, ctx), {
+      discard: true,
+    });
+  });
 
-const flushMerges = async (ctx: ApplyContext): Promise<void> => {
-  for (const [destAbs, value] of ctx.mergeAcc) {
-    // If a non-merge layer already wrote this file, merge into its contents.
-    let base: unknown = value;
-    if (ctx.emitted.has(destAbs) && existsSync(destAbs)) {
-      try {
-        const raw = await fsReadFile(destAbs, "utf8");
-        base = deepMerge(JSON.parse(raw), value);
-      } catch {
-        // existing file isn't JSON-parseable; fall back to merge value only.
-      }
-    }
-    await fsMkdir(dirname(destAbs), { recursive: true });
-    await fsWriteFile(destAbs, `${JSON.stringify(base, null, 2)}\n`, "utf8");
-    ctx.emitted.add(destAbs);
-  }
-};
+const flushMergesEffect = (
+  ctx: ApplyContext
+): Effect.Effect<void, FsError> =>
+  Effect.forEach(
+    [...ctx.mergeAcc],
+    ([destAbs, value]) =>
+      Effect.gen(function* () {
+        let base: unknown = value;
+        if (ctx.emitted.has(destAbs) && existsSync(destAbs)) {
+          const existing = yield* Effect.tryPromise({
+            try: () => fsReadFile(destAbs, "utf8"),
+            catch: (cause) =>
+              new FsError({ op: "readFile", path: destAbs, cause }),
+          }).pipe(
+            Effect.map((raw) => {
+              try {
+                return JSON.parse(raw) as unknown;
+              } catch {
+                return undefined;
+              }
+            })
+          );
+          if (existing !== undefined) {
+            base = deepMerge(existing, value);
+          }
+        }
+        yield* Effect.tryPromise({
+          try: async () => {
+            await fsMkdir(dirname(destAbs), { recursive: true });
+            await fsWriteFile(
+              destAbs,
+              `${JSON.stringify(base, null, 2)}\n`,
+              "utf8"
+            );
+          },
+          catch: (cause) =>
+            new FsError({ op: "writeFile", path: destAbs, cause }),
+        });
+        ctx.emitted.add(destAbs);
+      }),
+    { discard: true }
+  );
 
-export const seedTarget = (
+export const seedTarget = Effect.fn("seedTarget")((
   input: SeedInput
 ): Effect.Effect<
   ReadonlyArray<string>,
-  FsError,
+  FsError | PathEscape | MergeParseError,
   FileSystemService | TemplatesService
 > =>
   Effect.gen(function* () {
@@ -269,22 +311,13 @@ export const seedTarget = (
       emitted: new Set(),
     };
 
-    const run = Effect.tryPromise({
-      try: async () => {
-        for (const layer of orderedLayers) {
-          await applyLayer(layer, ctx);
-        }
-        await flushMerges(ctx);
-      },
-      catch: (cause) =>
-        new FsError({ op: "applyLayers", path: input.targetDir, cause }),
-    });
+    yield* Effect.forEach(
+      orderedLayers,
+      (layer) => applyLayerEffect(layer, ctx),
+      { discard: true }
+    );
+    yield* flushMergesEffect(ctx);
 
-    yield* run;
-
-    // Copy variant's generator directory to <target>/turbo/generators so
-    // `turbo gen run` keeps working inside the generated repo. Single-app
-    // variants opt out by omitting `manifest.generators`.
     if (input.manifest.generators !== undefined) {
       const generators = input.manifest.generators;
       const generatorsSource = resolve(templates.root(), generators.source);
@@ -297,4 +330,5 @@ export const seedTarget = (
     }
 
     return [...ctx.emitted];
-  });
+  }),
+);

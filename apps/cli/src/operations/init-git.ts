@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { ProcessService } from "../services/Process.ts";
 import type { SpawnError } from "../domain/errors.ts";
 
-export const initGit = (
+export const initGit = Effect.fn("initGit")((
   targetDir: string
 ): Effect.Effect<void, SpawnError, ProcessService> =>
   Effect.gen(function* () {
@@ -36,4 +36,5 @@ export const initGit = (
         { cwd: targetDir }
       )
       .pipe(Effect.catchTag("SpawnError", () => Effect.void));
-  });
+  }),
+);

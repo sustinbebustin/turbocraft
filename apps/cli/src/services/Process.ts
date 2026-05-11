@@ -5,11 +5,6 @@ import { SpawnError } from "../domain/errors.ts";
 export type RunOptions = {
   readonly cwd: string;
   readonly env?: Readonly<Record<string, string>>;
-  /**
-   * When true, child stdio is inherited from the parent process so the user
-   * can see and respond to interactive prompts (browser-login URLs, etc.).
-   * Captured `stdout` / `stderr` will be empty strings in this mode.
-   */
   readonly interactive?: boolean;
 };
 
@@ -56,7 +51,7 @@ const live = ProcessService.of({
               exitCode: null,
               stderr: cause instanceof Error ? cause.message : String(cause),
             }),
-    }),
+    }).pipe(Effect.withSpan("Process.run")),
 });
 
 export const ProcessLive = Layer.succeed(ProcessService, live);

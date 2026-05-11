@@ -46,9 +46,9 @@ const live = TemplatesService.of({
           variant: id,
           message: `No manifest registered for variant '${id}'. Available: ${Object.keys(manifest).join(", ")}`,
         })
-      );
+      ).pipe(Effect.withSpan("Templates.get"));
     }
-    return Effect.succeed(value);
+    return Effect.succeed(value).pipe(Effect.withSpan("Templates.get"));
   },
   root: () => templatesRoot(),
 });

@@ -32,17 +32,20 @@ export class FileSystemService extends Context.Tag("FileSystemService")<
 >() {}
 
 const live = FileSystemService.of({
-  exists: (path) => Effect.sync(() => existsSync(path)),
+  exists: (path) =>
+    Effect.sync(() => existsSync(path)).pipe(
+      Effect.withSpan("FileSystem.exists")
+    ),
   mkdirp: (path) =>
     Effect.tryPromise({
       try: () => fsMkdir(path, { recursive: true }).then(() => undefined),
       catch: (cause) => new FsError({ op: "mkdir", path, cause }),
-    }),
+    }).pipe(Effect.withSpan("FileSystem.mkdirp")),
   rm: (path) =>
     Effect.tryPromise({
       try: () => fsRm(path, { recursive: true, force: true }),
       catch: (cause) => new FsError({ op: "rm", path, cause }),
-    }),
+    }).pipe(Effect.withSpan("FileSystem.rm")),
   copyDir: (from, to, options) =>
     Effect.tryPromise({
       try: () =>
@@ -53,7 +56,7 @@ const live = FileSystemService.of({
         }),
       catch: (cause) =>
         new FsError({ op: "copyDir", path: `${from} -> ${to}`, cause }),
-    }),
+    }).pipe(Effect.withSpan("FileSystem.copyDir")),
   isEmptyDir: (path) =>
     Effect.tryPromise({
       try: async () => {
@@ -62,7 +65,7 @@ const live = FileSystemService.of({
         return entries.length === 0;
       },
       catch: (cause) => new FsError({ op: "readdir", path, cause }),
-    }),
+    }).pipe(Effect.withSpan("FileSystem.isEmptyDir")),
   listEntries: (path) =>
     Effect.tryPromise({
       try: async () => {
@@ -71,7 +74,7 @@ const live = FileSystemService.of({
         return [...entries].sort();
       },
       catch: (cause) => new FsError({ op: "readdir", path, cause }),
-    }),
+    }).pipe(Effect.withSpan("FileSystem.listEntries")),
 });
 
 export const FileSystemLive = Layer.succeed(FileSystemService, live);

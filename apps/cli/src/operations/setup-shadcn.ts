@@ -97,7 +97,7 @@ const dedupe = (xs: ReadonlyArray<string>): ReadonlyArray<string> => {
  * `skippedReason` so the outro can print fallback commands. The repo is
  * always left runnable.
  */
-export const setupShadcn = (
+export const setupShadcn = Effect.fn("setupShadcn")((
   config: ProjectConfig
 ): Effect.Effect<ShadcnSetupReport, never, ProcessService> => {
   if (
@@ -108,11 +108,12 @@ export const setupShadcn = (
     return Effect.succeed(SKIPPED_NOT_REQUESTED);
   }
 
+  const shadcn = config.shadcn;
   const cwd = shadcnCwdFor(config);
   const runner = runnerFor(config.packageManager);
   const wantsAll =
-    config.shadcn.components.length === 1 &&
-    config.shadcn.components[0] === SHADCN_ALL_COMPONENTS;
+    shadcn.components.length === 1 &&
+    shadcn.components[0] === SHADCN_ALL_COMPONENTS;
 
   return Effect.gen(function* () {
     const proc = yield* ProcessService;
@@ -121,7 +122,7 @@ export const setupShadcn = (
       ...runner.prefix,
       "init",
       "--preset",
-      config.shadcn!.preset,
+      shadcn.preset,
       "--base",
       "base",
       "--template",
@@ -173,7 +174,7 @@ export const setupShadcn = (
     const components = dedupe([
       ...baseRequired,
       ...(wantsBetterAuth ? BETTER_AUTH_REQUIRED : []),
-      ...config.shadcn!.components,
+      ...shadcn.components,
     ]);
 
     if (components.length === 0) {
@@ -201,4 +202,4 @@ export const setupShadcn = (
           }),
     };
   });
-};
+});

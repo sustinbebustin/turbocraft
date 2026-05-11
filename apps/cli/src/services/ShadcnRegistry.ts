@@ -51,7 +51,7 @@ const live = ShadcnRegistry.of({
         }
       },
       catch: (cause) => new NetworkError({ url: REGISTRY_INDEX_URL, cause }),
-    }),
+    }).pipe(Effect.withSpan("ShadcnRegistry.fetchComponentNames")),
 });
 
 export const ShadcnRegistryLive = Layer.succeed(ShadcnRegistry, live);
