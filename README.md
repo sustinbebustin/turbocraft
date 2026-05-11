@@ -1,5 +1,9 @@
 # turbocraft
 
+[![npm turbocraft package](https://img.shields.io/npm/v/turbocraft.svg?label=turbocraft)](https://npmjs.org/package/turbocraft)
+[![npm create-turbocraft package](https://img.shields.io/npm/v/create-turbocraft.svg?label=create-turbocraft)](https://npmjs.org/package/create-turbocraft)
+[![license](https://img.shields.io/npm/l/turbocraft.svg)](./LICENSE)
+
 Scaffold a production-ready Next.js or TanStack Start project — monorepo or single-app — with one command.
 
 ```bash
