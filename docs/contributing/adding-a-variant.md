@@ -163,8 +163,9 @@ new option. Match the label/value style of the existing entries.
 
 ```bash
 pnpm typecheck && pnpm test && pnpm build
+rm -rf /tmp/sk-test
 pnpm dlx . create /tmp/sk-test --framework sveltekit --layout monorepo \
-  --no-install --no-git --force
+  --no-install --no-git
 ```
 
 Add a changeset (`pnpm changeset`) describing the new variant. See

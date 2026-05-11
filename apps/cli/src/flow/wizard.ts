@@ -8,6 +8,7 @@ import {
   multiselect,
   confirm,
 } from "@clack/prompts";
+import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   Feature,
@@ -21,7 +22,12 @@ import {
   type Layout as LayoutT,
   type PackageManager as PackageManagerT,
 } from "@turbocraft/core";
-import { UserCancelled, InvalidConfig, WizardError } from "../domain/errors.ts";
+import {
+  UserCancelled,
+  InvalidConfig,
+  TargetDirNotEmpty,
+  WizardError,
+} from "../domain/errors.ts";
 import { allFeatureCompatibility } from "@turbocraft/templates";
 
 export type WizardInput = {
@@ -32,8 +38,21 @@ export type WizardInput = {
   readonly packageManager?: PackageManagerT;
   readonly install?: boolean;
   readonly git?: boolean;
-  readonly force?: boolean;
   readonly cwd: string;
+};
+
+/**
+ * Synchronous emptiness check used by both the interactive `text` validator
+ * (which must be sync) and the early CLI-arg guard. Returns the sorted list
+ * of conflicting entries, or `[]` if the directory is empty or missing.
+ */
+const findConflicts = (targetDir: string): ReadonlyArray<string> => {
+  if (!existsSync(targetDir)) return [];
+  try {
+    return [...readdirSync(targetDir)].sort();
+  } catch {
+    return [];
+  }
 };
 
 const guard = <T>(value: T | symbol, stage: string): T => {
@@ -73,9 +92,23 @@ const expandFeatureRequires = (
 
 export const runWizard = (
   input: WizardInput
-): Effect.Effect<ProjectConfig, UserCancelled | InvalidConfig | WizardError> =>
+): Effect.Effect<
+  ProjectConfig,
+  UserCancelled | InvalidConfig | TargetDirNotEmpty | WizardError
+> =>
   Effect.tryPromise({
     try: async () => {
+      // When the name is supplied non-interactively, validate the target dir
+      // before showing any prompts so the user isn't asked questions only to
+      // hit a hard failure at scaffold time.
+      if (input.name !== undefined) {
+        const targetDir = resolve(input.cwd, input.name);
+        const conflicts = findConflicts(targetDir);
+        if (conflicts.length > 0) {
+          throw new TargetDirNotEmpty({ path: targetDir, conflicts });
+        }
+      }
+
       const answers = await group(
         {
           name: () =>
@@ -88,6 +121,16 @@ export const runWizard = (
                     if (!v) return "Required.";
                     if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/u.test(v)) {
                       return "Use kebab-case: lowercase letters, digits, hyphens.";
+                    }
+                    const targetDir = resolve(input.cwd, v);
+                    const conflicts = findConflicts(targetDir);
+                    if (conflicts.length > 0) {
+                      const preview = conflicts.slice(0, 3).join(", ");
+                      const more =
+                        conflicts.length > 3
+                          ? ` (+${conflicts.length - 3} more)`
+                          : "";
+                      return `Directory '${v}' is not empty: ${preview}${more}. Pick a different name.`;
                     }
                     return undefined;
                   },
@@ -185,7 +228,6 @@ export const runWizard = (
         packageManager,
         install,
         git,
-        force: input.force ?? false,
       });
 
       if (!parsed.success) {
@@ -204,6 +246,7 @@ export const runWizard = (
     catch: (cause) => {
       if (cause instanceof UserCancelled) return cause;
       if (cause instanceof InvalidConfig) return cause;
+      if (cause instanceof TargetDirNotEmpty) return cause;
       return new WizardError({ cause });
     },
   });

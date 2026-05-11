@@ -25,6 +25,9 @@ export class FileSystemService extends Context.Tag("FileSystemService")<
       options?: CopyOptions
     ) => Effect.Effect<void, FsError>;
     readonly isEmptyDir: (path: string) => Effect.Effect<boolean, FsError>;
+    readonly listEntries: (
+      path: string
+    ) => Effect.Effect<ReadonlyArray<string>, FsError>;
   }
 >() {}
 
@@ -57,6 +60,15 @@ const live = FileSystemService.of({
         if (!existsSync(path)) return true;
         const entries = await fsReaddir(path);
         return entries.length === 0;
+      },
+      catch: (cause) => new FsError({ op: "readdir", path, cause }),
+    }),
+  listEntries: (path) =>
+    Effect.tryPromise({
+      try: async () => {
+        if (!existsSync(path)) return [] as ReadonlyArray<string>;
+        const entries = await fsReaddir(path);
+        return [...entries].sort();
       },
       catch: (cause) => new FsError({ op: "readdir", path, cause }),
     }),

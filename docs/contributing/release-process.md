@@ -54,9 +54,10 @@ pnpm build --filter=turbocraft --filter=create-turbocraft
 Optionally smoke the bundle:
 
 ```bash
+rm -rf /tmp/release-smoke
 node apps/cli/dist/bin.mjs create /tmp/release-smoke \
   --framework nextjs --layout monorepo \
-  --no-install --no-git --force
+  --no-install --no-git
 ```
 
 ## CI on merge to `main`

@@ -72,8 +72,12 @@ const manifest  = yield* templates.get(variantId);
 
 ### 2. Empty-dir guard
 
-Unless `--force`, the target dir must be empty. The check uses
-`fs.isEmptyDir()` and fails with `FsError({ op: "ensureEmpty" })` if not.
+The target dir must be empty (or not yet exist). The check uses
+`fs.listEntries()` and fails with `TargetDirNotEmpty({ path, conflicts })`
+if it finds any entries. The wizard also runs this check earlier - inline
+while the user is typing a name, and up front when `--name` is passed
+non-interactively - so the user doesn't reach the scaffold step with a
+known-bad target.
 
 ### 3. Seed layers
 

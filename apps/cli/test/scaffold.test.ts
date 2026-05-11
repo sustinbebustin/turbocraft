@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, afterAll } from "vitest";
-import { Effect, Layer } from "effect";
-import { mkdtemp, rm, readFile } from "node:fs/promises";
+import { Cause, Effect, Exit, Layer } from "effect";
+import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -45,7 +45,6 @@ describe("scaffold nextjs-monorepo (default options)", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
 
     const report = await runScaffold(config);
@@ -117,7 +116,6 @@ describe("scaffold tanstack-monorepo (default options)", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
 
     const report = await runScaffold(config);
@@ -179,7 +177,6 @@ describe("scaffold tanstack-monorepo with convex + better-auth", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
     await runScaffold(config);
 
@@ -236,7 +233,6 @@ describe("scaffold nextjs-single (no features)", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
     const report = await runScaffold(config);
     expect(report.variant).toBe("nextjs-single");
@@ -305,7 +301,6 @@ describe("scaffold nextjs-single with convex + better-auth", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
     await runScaffold(config);
 
@@ -363,7 +358,6 @@ describe("scaffold tanstack-single (no features)", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
     const report = await runScaffold(config);
     expect(report.variant).toBe("tanstack-single");
@@ -437,7 +431,6 @@ describe("scaffold tanstack-single with convex + better-auth", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
     await runScaffold(config);
 
@@ -498,7 +491,6 @@ describe("scaffold nextjs-monorepo with convex + better-auth", () => {
       packageManager: "pnpm",
       install: false,
       git: false,
-      force: false,
     };
     await runScaffold(config);
 
@@ -531,5 +523,47 @@ describe("scaffold nextjs-monorepo with convex + better-auth", () => {
     );
     expect(layout).toContain("ConvexClientProvider");
     expect(layout).toContain("getToken");
+  });
+});
+
+describe("scaffold refuses to write into a non-empty directory", () => {
+  let target: string;
+
+  beforeAll(async () => {
+    const root = await mkdtemp(join(tmpdir(), "turbocraft-test-"));
+    target = join(root, "my-app");
+    await writeFile(join(root, "placeholder.txt"), "noise\n");
+    // Use the root itself so it's guaranteed non-empty.
+    target = root;
+  });
+
+  afterAll(async () => {
+    if (target) await rm(target, { recursive: true, force: true });
+  });
+
+  it("fails with TargetDirNotEmpty listing the conflicts", async () => {
+    const config: ProjectConfig = {
+      name: "my-app",
+      targetDir: target,
+      framework: "nextjs",
+      layout: "monorepo",
+      features: [],
+      packageManager: "pnpm",
+      install: false,
+      git: false,
+    };
+
+    const exit = await Effect.runPromiseExit(
+      scaffold(config).pipe(Effect.provide(Layers))
+    );
+    expect(Exit.isFailure(exit)).toBe(true);
+    if (!Exit.isFailure(exit)) return;
+    const failure = Cause.failureOption(exit.cause);
+    expect(failure._tag).toBe("Some");
+    if (failure._tag !== "Some") return;
+    expect(failure.value._tag).toBe("TargetDirNotEmpty");
+    if (failure.value._tag !== "TargetDirNotEmpty") return;
+    expect(failure.value.path).toBe(target);
+    expect(failure.value.conflicts).toContain("placeholder.txt");
   });
 });

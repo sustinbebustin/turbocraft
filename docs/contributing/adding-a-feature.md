@@ -170,10 +170,11 @@ test("scaffolds nextjs-monorepo with drizzle", async () => {
 
 ```bash
 pnpm typecheck && pnpm test && pnpm build
+rm -rf /tmp/dz-test
 node apps/cli/dist/bin.mjs create /tmp/dz-test \
   --framework nextjs --layout monorepo \
   --features convex,drizzle \
-  --no-install --no-git --force
+  --no-install --no-git
 ls /tmp/dz-test/apps/web/drizzle*    # sanity check the feature landed
 ```
 

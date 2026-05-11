@@ -31,7 +31,6 @@ export const ProjectConfig = z
     packageManager: PackageManager.default("pnpm"),
     install: z.boolean().default(true),
     git: z.boolean().default(true),
-    force: z.boolean().default(false),
   })
   .refine(
     (cfg) =>

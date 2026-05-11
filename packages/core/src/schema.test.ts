@@ -20,7 +20,6 @@ describe("ProjectConfig", () => {
     packageManager: "pnpm" as const,
     install: false,
     git: false,
-    force: false,
   };
 
   it("accepts a kebab-case name", () => {
