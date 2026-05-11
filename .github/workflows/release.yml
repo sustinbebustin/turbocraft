@@ -25,11 +25,10 @@ jobs:
           # changesets diffs against tags to find pending releases
           fetch-depth: 0
 
+      # pnpm version comes from `packageManager` in root package.json
+      # (pnpm@10.33.0). Don't pin `version:` here — action-setup@v6 errors
+      # on conflict with `packageManager`.
       - uses: pnpm/action-setup@v6
-        with:
-          # pin: pnpm 11 changed publish internals; stay on 10 for predictable
-          # workspace: + catalog: rewriting behaviour.
-          version: 10
 
       - uses: actions/setup-node@v6
         with:
