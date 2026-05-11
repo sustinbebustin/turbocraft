@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@clack/prompts": "catalog:",
+    "@effect/vitest": "catalog:",
     "@effect/platform": "catalog:",
     "@effect/platform-node": "catalog:",
     "@turbocraft/core": "workspace:*",

@@ -18,6 +18,9 @@ catalogs:
     '@effect/platform-node':
       specifier: ^0.99.0
       version: 0.99.0
+    '@effect/vitest':
+      specifier: ^0.29.0
+      version: 0.29.0
     '@types/node':
       specifier: ^25.6.0
       version: 25.6.2
@@ -27,6 +30,9 @@ catalogs:
     effect:
       specifier: ^3.21.2
       version: 3.21.2
+    fast-check:
+      specifier: ^4.7.0
+      version: 4.7.0
     handlebars:
       specifier: ^4.7.9
       version: 4.7.9
@@ -110,6 +116,9 @@ importers:
       '@effect/platform-node':
         specifier: 'catalog:'
         version: 0.99.0(@effect/cluster@0.51.0(@effect/platform@0.93.8(effect@3.21.2))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.47.0(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/workflow@0.12.5(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.93.8(effect@3.21.2))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.93.8(effect@3.21.2))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.47.0(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(effect@3.21.2)
+      '@effect/vitest':
+        specifier: 'catalog:'
+        version: 0.29.0(effect@3.21.2)(vitest@4.1.5(@types/node@25.6.2)(vite@8.0.11(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.8.4)))
       '@turbocraft/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -171,12 +180,18 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
+      '@effect/vitest':
+        specifier: 'catalog:'
+        version: 0.29.0(effect@3.21.2)(vitest@4.1.5(@types/node@25.6.2)(vite@8.0.11(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.8.4)))
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.2
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      fast-check:
+        specifier: 'catalog:'
+        version: 4.7.0
       tsdown:
         specifier: 'catalog:'
         version: 0.22.0(oxc-resolver@11.19.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))(typescript@6.0.3)
@@ -360,6 +375,12 @@ packages:
       '@effect/experimental': ^0.57.0
       '@effect/platform': ^0.93.0
       effect: ^3.19.0
+
+  '@effect/vitest@0.29.0':
+    resolution: {integrity: sha512-DvWr1aeEcaZ8mtu8hNVb4e3rEYvGEwQSr7wsNrW53t6nKYjkmjRICcvVEsXUhjoCblRHSxRsRV0TOt0+UmcvaQ==}
+    peerDependencies:
+      effect: ^3.21.0
+      vitest: ^3.2.0
 
   '@effect/workflow@0.12.5':
     resolution: {integrity: sha512-9vsXqprb30FfWU84lwOi13bJpVXgl0q58hb5tpWb2uTDFmLHEoF8a/P3Io2dD47ZA/4VGf47NCkj+15QLIeGeQ==}
@@ -1650,6 +1671,10 @@ packages:
     resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
     engines: {node: '>=8.0.0'}
 
+  fast-check@4.7.0:
+    resolution: {integrity: sha512-NsZRtqvSSoCP0HbNjUD+r1JH8zqZalyp6gLY9e7OYs7NK9b6AHOs2baBFeBG7bVNsuoukh89x2Yg3rPsul8ziQ==}
+    engines: {node: '>=12.17.0'}
+
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -2159,6 +2184,9 @@ packages:
 
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
+
+  pure-rand@8.4.0:
+    resolution: {integrity: sha512-IoM8YF/jY0hiugFo/wOWqfmarlE6J0wc6fDK1PhftMk7MGhVZl88sZimmqBBFomLOCSmcCCpsfj7wXASCpvK9A==}
 
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
@@ -2828,6 +2856,11 @@ snapshots:
       '@effect/platform': 0.93.8(effect@3.21.2)
       effect: 3.21.2
       uuid: 11.1.1
+
+  '@effect/vitest@0.29.0(effect@3.21.2)(vitest@4.1.5(@types/node@25.6.2)(vite@8.0.11(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.8.4)))':
+    dependencies:
+      effect: 3.21.2
+      vitest: 4.1.5(@types/node@25.6.2)(vite@8.0.11(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.8.4))
 
   '@effect/workflow@0.12.5(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.93.8(effect@3.21.2))(@effect/rpc@0.72.2(@effect/platform@0.93.8(effect@3.21.2))(effect@3.21.2))(effect@3.21.2)':
     dependencies:
@@ -3734,6 +3767,10 @@ snapshots:
     dependencies:
       pure-rand: 6.1.0
 
+  fast-check@4.7.0:
+    dependencies:
+      pure-rand: 8.4.0
+
   fast-deep-equal@3.1.3: {}
 
   fast-glob@3.3.3:
@@ -4287,6 +4324,8 @@ snapshots:
   punycode@2.3.1: {}
 
   pure-rand@6.1.0: {}
+
+  pure-rand@8.4.0: {}
 
   quansync@0.2.11: {}
 

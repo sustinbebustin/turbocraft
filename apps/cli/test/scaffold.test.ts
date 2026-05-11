@@ -1,24 +1,15 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
-import { Cause, Effect, Exit, Layer } from "effect";
+import { describe, expect, it } from "@effect/vitest";
+import { beforeAll, afterAll } from "vitest";
+import { Cause, Effect, Exit } from "effect";
 import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ProjectConfig } from "@turbocraft/core";
 import { scaffold } from "../src/operations/scaffold.ts";
-import { FileSystemLive } from "../src/services/FileSystem.ts";
-import { PlopLive } from "../src/services/Plop.ts";
-import { PackageManagerLive } from "../src/services/PackageManager.ts";
-import { ProcessLive } from "../src/services/Process.ts";
-import { TemplatesLive } from "../src/services/Templates.ts";
+import { MainLive } from "../src/services/Live.ts";
 
-const Layers = Layer.mergeAll(
-  FileSystemLive,
-  PackageManagerLive.pipe(Layer.provide(ProcessLive)),
-  ProcessLive,
-  PlopLive,
-  TemplatesLive
-);
+const Layers = MainLive;
 
 const runScaffold = (config: ProjectConfig) =>
   Effect.runPromise(scaffold(config).pipe(Effect.provide(Layers)));
