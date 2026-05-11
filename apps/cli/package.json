@@ -1,6 +1,6 @@
 {
   "name": "turbocraft",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Interactive CLI for scaffolding full-stack monorepo templates with your choice of framework, auth, database, and UI.",
   "license": "MIT",
