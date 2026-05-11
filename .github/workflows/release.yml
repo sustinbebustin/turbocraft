@@ -51,8 +51,11 @@ jobs:
           # `pnpm release` = turbo build (filtered) && changeset publish.
           # changesets autodetects pnpm and runs `pnpm publish` per package,
           # which rewrites `workspace:*` and `catalog:` to concrete versions.
+          # `pnpm run` is required for `version`: bare `pnpm version` resolves
+          # to pnpm's built-in (prints Node versions), not our package.json
+          # script. `release` doesn't collide so the bare form is fine there.
           publish: pnpm release
-          version: pnpm version
+          version: pnpm run version
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
