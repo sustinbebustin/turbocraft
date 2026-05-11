@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/sustinbebustin/turbocraft">
-    <img alt="turbocraft logo" src="https://raw.githubusercontent.com/sustinbebustin/turbocraft/main/docs/assets/turbocraft-logo.png" height="160">
+    <img alt="turbocraft logo" src="https://raw.githubusercontent.com/sustinbebustin/turbocraft/main/docs/assets/turbocraft-logo.png" height="240">
   </a>
 
 [![npm turbocraft package](https://img.shields.io/npm/v/turbocraft.svg?label=turbocraft)](https://npmjs.org/package/turbocraft)
