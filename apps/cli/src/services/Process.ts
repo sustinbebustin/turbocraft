@@ -5,6 +5,12 @@ import { SpawnError } from "../domain/errors.ts";
 export type RunOptions = {
   readonly cwd: string;
   readonly env?: Readonly<Record<string, string>>;
+  /**
+   * When true, child stdio is inherited from the parent process so the user
+   * can see and respond to interactive prompts (browser-login URLs, etc.).
+   * Captured `stdout` / `stderr` will be empty strings in this mode.
+   */
+  readonly interactive?: boolean;
 };
 
 export class ProcessService extends Context.Tag("ProcessService")<
@@ -29,6 +35,7 @@ const live = ProcessService.of({
           nodeOptions: {
             cwd: options.cwd,
             env: { ...process.env, ...options.env },
+            ...(options.interactive === true ? { stdio: "inherit" } : {}),
           },
         });
         const result = await proc;

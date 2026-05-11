@@ -1,4 +1,4 @@
 {
-  "scripts": { "convex": "convex dev" },
+  "scripts": { "dev:convex": "convex dev" },
   "dependencies": { "convex": "catalog:" }
 }

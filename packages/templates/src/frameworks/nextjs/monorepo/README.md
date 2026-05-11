@@ -43,24 +43,33 @@ turbo/
 
 ## Quickstart
 
+If you let `turbocraft` install dependencies for you, the Convex deployment,
+`apps/web/.env.local`, and Better Auth secret are already set up. Start the
+app:
+
+```bash
+pnpm dev   # turbo runs `dev` (Next.js) and `dev:convex` in parallel under one TUI
+```
+
+### Manual setup (if you skipped install)
+
 ```bash
 pnpm install
 cp apps/web/.env.example apps/web/.env.local
 
-# In apps/web/, run Convex once. It logs you in, creates a deployment,
-# and writes CONVEX_DEPLOYMENT + NEXT_PUBLIC_CONVEX_URL into .env.local.
-pnpm --filter web convex
+# First-time only: log in, create a deployment, generate types,
+# and write CONVEX_DEPLOYMENT + NEXT_PUBLIC_CONVEX_URL into apps/web/.env.local.
+pnpm --filter web exec convex dev --once --configure new
 
 # Set the Better Auth secret on the Convex deployment.
 npx convex env set BETTER_AUTH_SECRET "$(openssl rand -base64 32)"
 
-# Then in two terminals (or split panes):
-pnpm --filter web convex   # keeps the Convex backend live
-pnpm dev                   # next dev (turbopack)
-```
+# Optional: NEXT_PUBLIC_CONVEX_SITE_URL is the .site host derived from
+# NEXT_PUBLIC_CONVEX_URL (swap .cloud for .site). Add it to
+# apps/web/.env.local if you wire OAuth callbacks.
 
-Manually add `NEXT_PUBLIC_CONVEX_SITE_URL` to `.env.local` (same host as
-`NEXT_PUBLIC_CONVEX_URL`, swap the `.cloud` for `.site`).
+pnpm dev   # Next.js + Convex in parallel under turbo's TUI
+```
 
 Requires Node >= 20 (`.npmrc` pins 22.20.0).
 
@@ -110,7 +119,7 @@ Run from the repo root:
 
 ```bash
 pnpm build              # turbo run build
-pnpm dev                # turbo run dev (persistent)
+pnpm dev                # turbo run dev dev:convex (persistent; Next.js + Convex)
 pnpm typecheck          # tsc --noEmit across workspaces
 pnpm test               # vitest run
 pnpm test:watch         # vitest
@@ -172,8 +181,8 @@ shadcn `components.json`. It then prompts:
   and `app/api/auth/[...all]/route.ts`.
 
 After generating, run `pnpm install` to wire the workspace links.
-Convex apps need `pnpm --filter <name> convex` once to bootstrap the
-Convex deployment + `_generated/` types.
+Convex apps need `pnpm --filter <name> exec convex dev --once --configure new`
+once to bootstrap the Convex deployment + `_generated/` types.
 
 **`page`** prompts for the target app, route path (route groups like
 `(app)/dashboard` and dynamic segments like `blog/[slug]` are allowed),

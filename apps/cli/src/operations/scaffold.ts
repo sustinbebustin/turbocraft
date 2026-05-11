@@ -27,6 +27,12 @@ export type ScaffoldReport = {
   readonly gitInitialised: boolean;
 };
 
+/**
+ * File-emission + install pipeline. Post-install Convex setup is owned by
+ * the calling command (see `commands/create.ts`) because it inherits stdio
+ * for the interactive browser-login flow, which conflicts with this
+ * pipeline's spinner UI.
+ */
 export const scaffold = (
   config: ProjectConfig
 ): Effect.Effect<

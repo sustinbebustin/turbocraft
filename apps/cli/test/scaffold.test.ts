@@ -85,7 +85,7 @@ describe("scaffold nextjs-monorepo (default options)", () => {
     expect(webPkg.dependencies?.["convex"]).toBeUndefined();
     expect(webPkg.dependencies?.["better-auth"]).toBeUndefined();
     expect(webPkg.dependencies?.["@convex-dev/better-auth"]).toBeUndefined();
-    expect(webPkg.scripts?.["convex"]).toBeUndefined();
+    expect(webPkg.scripts?.["dev:convex"]).toBeUndefined();
     expect(existsSync(join(target, "apps/web/convex"))).toBe(false);
     expect(existsSync(join(target, "apps/web/lib/auth-server.ts"))).toBe(false);
     expect(
@@ -201,7 +201,7 @@ describe("scaffold tanstack-monorepo with convex + better-auth", () => {
     expect(webPkg.dependencies?.["@convex-dev/react-query"]).toBe("catalog:");
     expect(webPkg.dependencies?.["better-auth"]).toBe("catalog:");
     expect(webPkg.dependencies?.["@convex-dev/better-auth"]).toBe("catalog:");
-    expect(webPkg.scripts?.["convex"]).toBe("convex dev");
+    expect(webPkg.scripts?.["dev:convex"]).toBe("convex dev");
 
     const router = await readFile(
       join(target, "apps/web/src/router.tsx"),
@@ -326,7 +326,10 @@ describe("scaffold nextjs-single with convex + better-auth", () => {
     expect(pkg.dependencies?.["convex"]).toBeDefined();
     expect(pkg.dependencies?.["better-auth"]).toBeDefined();
     expect(pkg.dependencies?.["@convex-dev/better-auth"]).toBeDefined();
-    expect(pkg.scripts?.["convex"]).toBe("convex dev");
+    expect(pkg.scripts?.["dev:convex"]).toBe("convex dev");
+    expect(pkg.scripts?.["dev"]).toBe(
+      'convex dev --start "next dev --turbopack"'
+    );
 
     // Both feature flags wired through to the templated layout.
     const layout = await readFile(join(target, "app/layout.tsx"), "utf8");
@@ -395,7 +398,7 @@ describe("scaffold tanstack-single (no features)", () => {
     expect(pkg.dependencies?.["@tanstack/react-router"]).toBeDefined();
     expect(pkg.dependencies?.["convex"]).toBeUndefined();
     expect(pkg.dependencies?.["better-auth"]).toBeUndefined();
-    expect(pkg.scripts?.["convex"]).toBeUndefined();
+    expect(pkg.scripts?.["dev:convex"]).toBeUndefined();
 
     // Templated router.tsx should not contain Convex bits when convex is off.
     const router = await readFile(join(target, "src/router.tsx"), "utf8");
@@ -457,7 +460,8 @@ describe("scaffold tanstack-single with convex + better-auth", () => {
     expect(pkg.dependencies?.["convex"]).toBeDefined();
     expect(pkg.dependencies?.["better-auth"]).toBeDefined();
     expect(pkg.dependencies?.["@convex-dev/better-auth"]).toBeDefined();
-    expect(pkg.scripts?.["convex"]).toBe("convex dev");
+    expect(pkg.scripts?.["dev:convex"]).toBe("convex dev");
+    expect(pkg.scripts?.["dev"]).toBe('convex dev --start "vite dev"');
 
     const router = await readFile(join(target, "src/router.tsx"), "utf8");
     expect(router).toContain("ConvexQueryClient");
@@ -515,7 +519,7 @@ describe("scaffold nextjs-monorepo with convex + better-auth", () => {
     expect(webPkg.dependencies?.["convex"]).toBe("catalog:");
     expect(webPkg.dependencies?.["better-auth"]).toBe("catalog:");
     expect(webPkg.dependencies?.["@convex-dev/better-auth"]).toBe("catalog:");
-    expect(webPkg.scripts?.["convex"]).toBe("convex dev");
+    expect(webPkg.scripts?.["dev:convex"]).toBe("convex dev");
 
     const layout = await readFile(
       join(target, "apps/web/app/layout.tsx"),

@@ -32,24 +32,32 @@ Path alias `@/*` resolves to the project root, so:
 
 ## Quickstart
 
+If you let `turbocraft` install dependencies for you, the Convex deployment,
+`.env.local`, and Better Auth secret are already set up. Start the app:
+
+```bash
+pnpm dev   # convex dev --start "next dev --turbopack" (Convex + Next.js in one terminal)
+```
+
+### Manual setup (if you skipped install)
+
 ```bash
 pnpm install
 cp .env.example .env.local
 
-# Run Convex once. It logs you in, creates a deployment, and writes
-# CONVEX_DEPLOYMENT + NEXT_PUBLIC_CONVEX_URL into .env.local.
-pnpm convex
+# First-time only: log in, create a deployment, generate types,
+# and write CONVEX_DEPLOYMENT + NEXT_PUBLIC_CONVEX_URL into .env.local.
+pnpm exec convex dev --once --configure new
 
 # Set the Better Auth secret on the Convex deployment.
 npx convex env set BETTER_AUTH_SECRET "$(openssl rand -base64 32)"
 
-# Then in two terminals (or split panes):
-pnpm convex   # keeps the Convex backend live
-pnpm dev      # next dev (turbopack)
-```
+# Optional: NEXT_PUBLIC_CONVEX_SITE_URL is the .site host derived from
+# NEXT_PUBLIC_CONVEX_URL (swap .cloud for .site). Add it to .env.local if
+# you wire OAuth callbacks.
 
-Manually add `NEXT_PUBLIC_CONVEX_SITE_URL` to `.env.local` (same host as
-`NEXT_PUBLIC_CONVEX_URL`, swap the `.cloud` for `.site`).
+pnpm dev   # convex dev + next dev, one terminal
+```
 
 Requires Node >= 20 (`.npmrc` pins 22.20.0).
 
@@ -96,8 +104,9 @@ delivers.
 ## Scripts
 
 ```bash
-pnpm dev                # next dev --turbopack
-pnpm convex             # convex dev
+pnpm dev                # convex dev --start "next dev --turbopack" (both in one terminal)
+pnpm dev:web            # next dev --turbopack only
+pnpm dev:convex         # convex dev only
 pnpm build              # next build
 pnpm start              # next start
 pnpm typecheck          # tsc --noEmit

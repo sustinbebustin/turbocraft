@@ -1,0 +1,9 @@
+{
+  "globalEnv": [
+    "VITE_CONVEX_URL",
+    "VITE_CONVEX_SITE_URL",
+    "VITE_SITE_URL",
+    "VITE_OAUTH_GOOGLE",
+    "VITE_OAUTH_GITHUB"
+  ]
+}

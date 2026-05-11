@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "{{#if withConvex}}convex dev --start \"next dev --turbopack\"{{else}}next dev --turbopack{{/if}}",{{#if withConvex}}
+    "dev:web": "next dev --turbopack",
+    "dev:convex": "convex dev",{{/if}}
     "build": "next build",
     "start": "next start",
     "lint": "oxlint",
