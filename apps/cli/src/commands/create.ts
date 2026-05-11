@@ -19,6 +19,18 @@ import { ProcessLive } from "../services/Process.ts";
 import { TemplatesLive } from "../services/Templates.ts";
 import { theme } from "../ui/theme.ts";
 
+const formatTargetDirNotEmpty = (
+  path: string,
+  conflicts: ReadonlyArray<string>
+): string => {
+  const header = `Target directory ${theme.code(path)} is not empty.`;
+  const list = conflicts.map((name) => `  ${name}`).join("\n");
+  const hint =
+    `Pick a different project name, or remove the existing directory:\n` +
+    `  ${theme.code(`rm -rf ${path}`)}`;
+  return [theme.err(header), list, "", hint].join("\n");
+};
+
 const parseFeatures = (raw: string | undefined): ReadonlyArray<FeatureT> => {
   if (raw === undefined || raw.length === 0) return [];
   const valid = Feature.options;
@@ -56,10 +68,6 @@ export const createCommand = defineCommand({
       description: "Install dependencies after scaffolding",
     },
     git: { type: "boolean", description: "Initialise git after scaffolding" },
-    force: {
-      type: "boolean",
-      description: "Allow scaffolding into a non-empty directory",
-    },
   },
   async run({ args }) {
     showIntro();
@@ -82,7 +90,6 @@ export const createCommand = defineCommand({
         packageManager: pm,
         install: typeof args.install === "boolean" ? args.install : undefined,
         git: typeof args.git === "boolean" ? args.git : undefined,
-        force: args.force === true,
       });
 
       const s = spinner();
@@ -111,12 +118,16 @@ export const createCommand = defineCommand({
     const exit = await Effect.runPromiseExit(program);
     if (exit._tag === "Failure") {
       const failure = Cause.failureOption(exit.cause);
-      if (
-        failure._tag === "Some" &&
-        failure.value._tag === "UserCancelled"
-      ) {
-        // clack already printed "Cancelled."; exit quietly.
-        process.exit(1);
+      if (failure._tag === "Some") {
+        const err = failure.value;
+        if (err._tag === "UserCancelled") {
+          // clack already printed "Cancelled."; exit quietly.
+          process.exit(1);
+        }
+        if (err._tag === "TargetDirNotEmpty") {
+          console.error(formatTargetDirNotEmpty(err.path, err.conflicts));
+          process.exit(1);
+        }
       }
       const pretty = Cause.pretty(exit.cause);
       console.error(theme.err(pretty));

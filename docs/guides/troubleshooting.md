@@ -2,22 +2,24 @@
 
 Common failure modes and how to recover.
 
-## `Target directory '...' is not empty. Use --force to overwrite.`
+## `Target directory '...' is not empty.`
 
-`turbocraft create` refuses to scaffold into a non-empty directory unless
-you pass `--force`. The check lives in
-[`scaffold.ts`](../../apps/cli/src/operations/scaffold.ts) and guards against
-accidentally clobbering an existing project.
+`turbocraft create` refuses to scaffold into a non-empty directory and
+lists the conflicting entries. There is no override flag - the check exists
+to prevent accidentally clobbering an existing project.
 
-Recover:
+Recover by either picking a different project name, or removing the
+existing directory and re-running:
 
 ```bash
-turbocraft create my-app --force
+rm -rf my-app
+turbocraft create my-app
 ```
 
-`--force` does not delete existing files; it just lifts the empty-dir guard.
-Files with the same destination path as a template asset will be
-overwritten in place.
+The check runs three times: in the wizard's name validator (interactive),
+before the wizard starts (when `--name` is passed non-interactively), and
+as a final safety net in
+[`scaffold.ts`](../../apps/cli/src/operations/scaffold.ts).
 
 ## `Better Auth requires Convex; enable both or neither.`
 

@@ -87,7 +87,7 @@ See [Build and bundling](build-and-bundling.md) for the mechanics.
                   v
    scaffold():
      1. resolve variant manifest from @turbocraft/templates
-     2. ensure target dir empty (or --force)
+     2. ensure target dir empty (or not yet exist)
      3. seedTarget — walk layers, render .hbs, deep-merge .merge.json
      4. runInitialGenerators — Plop (empty for current variants)
      5. initGit

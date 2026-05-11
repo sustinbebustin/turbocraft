@@ -8,8 +8,9 @@ export const initGit = (
   targetDir: string
 ): Effect.Effect<void, SpawnError, ProcessService> =>
   Effect.gen(function* () {
-    // Skip if the target already has a repo (e.g. scaffolded with --force into
-    // an existing project tree).
+    // Defensive: scaffold already refuses to write into a non-empty dir, so
+    // this branch is unreachable in normal flows. Kept as a guard against
+    // callers that bypass the wizard.
     if (existsSync(join(targetDir, ".git"))) return;
 
     const proc = yield* ProcessService;

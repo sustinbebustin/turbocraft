@@ -38,12 +38,15 @@ Build, then run the bundled binary against a scratch directory:
 
 ```bash
 pnpm build
+rm -rf /tmp/tc-test
 node apps/cli/dist/bin.mjs create /tmp/tc-test \
   --framework nextjs --layout monorepo \
-  --no-install --no-git --force
+  --no-install --no-git
 ```
 
-`--no-install --no-git` keeps the smoke fast and side-effect-free.
+`--no-install --no-git` keeps the smoke fast and side-effect-free. The
+`rm -rf` is needed on repeat runs because turbocraft refuses to scaffold
+into a non-empty directory.
 
 To exercise the source code (not the bundle), use the scaffold tests:
 

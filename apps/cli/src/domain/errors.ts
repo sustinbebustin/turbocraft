@@ -14,6 +14,11 @@ export class FsError extends Data.TaggedError("FsError")<{
   readonly cause: unknown;
 }> {}
 
+export class TargetDirNotEmpty extends Data.TaggedError("TargetDirNotEmpty")<{
+  readonly path: string;
+  readonly conflicts: ReadonlyArray<string>;
+}> {}
+
 export class SpawnError extends Data.TaggedError("SpawnError")<{
   readonly command: string;
   readonly exitCode: number | null;
@@ -34,6 +39,7 @@ export type CliError =
   | UserCancelled
   | InvalidConfig
   | FsError
+  | TargetDirNotEmpty
   | SpawnError
   | PlopError
   | WizardError;

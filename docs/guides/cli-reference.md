@@ -35,7 +35,9 @@ Source: [`apps/cli/src/commands/create.ts`](../../apps/cli/src/commands/create.t
 | `--pm`         | string    | `pnpm` \| `npm` \| `bun`. Defaults to `pnpm`.                  |
 | `--install`    | boolean   | Run `<pm> install` after scaffolding. Default `true`.          |
 | `--git`        | boolean   | `git init` after scaffolding. Default `true`.                  |
-| `--force`      | boolean   | Allow scaffolding into a non-empty directory.                  |
+
+The target directory must be empty (or not yet exist). If it contains files,
+`turbocraft create` aborts before any prompts and lists the conflicting entries.
 
 Validation: project name and all enum-typed flags are parsed via Zod schemas
 in [`packages/core/src/schema.ts`](../../packages/core/src/schema.ts). The

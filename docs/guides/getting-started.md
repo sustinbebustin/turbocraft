@@ -71,10 +71,11 @@ To scaffold *without* running install or git (useful in tests):
 ```bash
 turbocraft create /tmp/probe \
   --framework tanstack --layout single \
-  --no-install --no-git --force
+  --no-install --no-git
 ```
 
-`--force` allows scaffolding into a non-empty directory.
+The target directory must be empty (or not yet exist); turbocraft refuses
+to write over an existing project.
 
 ## What you get
 

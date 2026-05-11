@@ -7,7 +7,12 @@ import { PlopService } from "../services/Plop.ts";
 import { PackageManagerService } from "../services/PackageManager.ts";
 import { ProcessService } from "../services/Process.ts";
 import { TemplatesService } from "../services/Templates.ts";
-import { FsError, PlopError, SpawnError } from "../domain/errors.ts";
+import {
+  FsError,
+  PlopError,
+  SpawnError,
+  TargetDirNotEmpty,
+} from "../domain/errors.ts";
 import { ManifestError } from "@turbocraft/core";
 import { seedTarget } from "./seed.ts";
 import { runInitialGenerators } from "./run-generator.ts";
@@ -26,7 +31,7 @@ export const scaffold = (
   config: ProjectConfig
 ): Effect.Effect<
   ScaffoldReport,
-  FsError | SpawnError | PlopError | ManifestError,
+  FsError | TargetDirNotEmpty | SpawnError | PlopError | ManifestError,
   | FileSystemService
   | PlopService
   | PackageManagerService
@@ -41,15 +46,12 @@ export const scaffold = (
     const manifest = yield* templates.get(variantId);
 
     const targetDir = resolve(config.targetDir);
-    if (!config.force) {
-      const empty = yield* fs.isEmptyDir(targetDir);
-      if (!empty) {
-        return yield* new FsError({
-          op: "ensureEmpty",
-          path: targetDir,
-          cause: `Target directory '${targetDir}' is not empty. Use --force to overwrite.`,
-        });
-      }
+    const existing = yield* fs.listEntries(targetDir);
+    if (existing.length > 0) {
+      return yield* new TargetDirNotEmpty({
+        path: targetDir,
+        conflicts: existing,
+      });
     }
 
     const initialAnswers = {
