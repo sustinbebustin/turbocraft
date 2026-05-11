@@ -1,6 +1,6 @@
 # Adding a variant
 
-A *variant* is a (framework, layout) pair that produces one kind of
+A _variant_ is a (framework, layout) pair that produces one kind of
 scaffolded project. The repo currently ships four:
 
 - `nextjs-monorepo`, `nextjs-single`
@@ -39,9 +39,12 @@ Add the new variant id:
 
 ```ts
 export const VariantId = z.enum([
-  "nextjs-monorepo", "nextjs-single",
-  "tanstack-monorepo", "tanstack-single",
-  "sveltekit-monorepo", "sveltekit-single",
+  "nextjs-monorepo",
+  "nextjs-single",
+  "tanstack-monorepo",
+  "tanstack-single",
+  "sveltekit-monorepo",
+  "sveltekit-single",
 ]);
 ```
 
@@ -102,14 +105,14 @@ import type { TemplateManifest } from "@turbocraft/core";
 export const manifest: TemplateManifest = {
   id: "sveltekit-monorepo",
   layers: [
-    { from: "shared/monorepo",                to: "." },
-    { from: "frameworks/sveltekit/monorepo",  to: "." },
+    { from: "shared/monorepo", to: "." },
+    { from: "frameworks/sveltekit/monorepo", to: "." },
   ],
   featureLayers: {
     convex: [
-      { from: "features/convex/files",            to: "apps/web" },
-      { from: "features/convex/deps/monorepo",    to: "apps/web" },
-      { from: "features/convex/sveltekit/files",  to: "apps/web" },
+      { from: "features/convex/files", to: "apps/web" },
+      { from: "features/convex/deps/monorepo", to: "apps/web" },
+      { from: "features/convex/sveltekit/files", to: "apps/web" },
     ],
   },
   generators: {
@@ -156,7 +159,7 @@ new option. Match the label/value style of the existing entries.
 ## 9. Update docs
 
 - Add the new variants to [Variants](../guides/variants.md).
-- If the framework adds a runtime dependency to the *scaffolded* project,
+- If the framework adds a runtime dependency to the _scaffolded_ project,
   call it out in [Getting started](../guides/getting-started.md).
 
 ## 10. Smoke + ship

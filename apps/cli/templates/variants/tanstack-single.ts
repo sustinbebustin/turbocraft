@@ -11,6 +11,10 @@ export const manifest: TemplateManifest = {
     { from: "frameworks/tanstack/app", to: "." },
   ],
   featureLayers: {
+    shadcn: [
+      { from: "features/shadcn/deps/single", to: "." },
+      { from: "features/shadcn/tanstack/files", to: "." },
+    ],
     convex: [
       { from: "features/convex/files", to: "." },
       { from: "features/convex/deps/single", to: "." },
@@ -24,5 +28,5 @@ export const manifest: TemplateManifest = {
   },
   // No `generators` block — single-app projects aren't turborepos.
   initialGenerators: [],
-  supportedFeatures: ["convex", "better-auth"],
+  supportedFeatures: ["shadcn", "convex", "better-auth"],
 };

@@ -9,7 +9,7 @@ export type Layout = z.infer<typeof Layout>;
 export const PackageManager = z.enum(["pnpm", "npm", "bun"]);
 export type PackageManager = z.infer<typeof PackageManager>;
 
-export const Feature = z.enum(["convex", "better-auth"]);
+export const Feature = z.enum(["shadcn", "convex", "better-auth"]);
 export type Feature = z.infer<typeof Feature>;
 
 export const ProjectName = z
@@ -21,6 +21,18 @@ export const ProjectName = z
   });
 export type ProjectName = z.infer<typeof ProjectName>;
 
+export const SHADCN_ALL_COMPONENTS = "__all__" as const;
+
+export const ShadcnConfig = z.object({
+  // Either the named/code preset string passed to `shadcn init --preset`,
+  // or "default" — resolved by the CLI to its baked-in default code.
+  preset: z.string().min(1),
+  // Empty array = init only. [SHADCN_ALL_COMPONENTS] = `add --all`.
+  // Otherwise: explicit list of component names.
+  components: z.array(z.string()).default([]),
+});
+export type ShadcnConfig = z.infer<typeof ShadcnConfig>;
+
 export const ProjectConfig = z
   .object({
     name: ProjectName,
@@ -28,6 +40,7 @@ export const ProjectConfig = z
     framework: Framework,
     layout: Layout,
     features: z.array(Feature).default([]),
+    shadcn: ShadcnConfig.optional(),
     packageManager: PackageManager.default("pnpm"),
     install: z.boolean().default(true),
     git: z.boolean().default(true),
@@ -38,6 +51,21 @@ export const ProjectConfig = z
     {
       message: "Better Auth requires Convex; enable both or neither.",
       path: ["features"],
+    }
+  )
+  .refine(
+    (cfg) =>
+      !cfg.features.includes("better-auth") || cfg.features.includes("shadcn"),
+    {
+      message: "Better Auth requires shadcn; enable both or neither.",
+      path: ["features"],
+    }
+  )
+  .refine(
+    (cfg) => !cfg.features.includes("shadcn") || cfg.shadcn !== undefined,
+    {
+      message: "shadcn feature requires a shadcn config block.",
+      path: ["shadcn"],
     }
   );
 export type ProjectConfig = z.infer<typeof ProjectConfig>;

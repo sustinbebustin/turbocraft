@@ -85,7 +85,7 @@ directly to see Plop's error message in context.
 
 ## Package manager mismatch
 
-`--pm pnpm` (default), `--pm npm`, and `--pm bun` only change *which*
+`--pm pnpm` (default), `--pm npm`, and `--pm bun` only change _which_
 install command runs after the scaffold. The generated project itself
 always assumes `pnpm` for monorepo variants because the workspace catalog
 feature is pnpm-specific. If you want npm or bun, use a single-app variant.

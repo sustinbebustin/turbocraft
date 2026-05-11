@@ -19,10 +19,14 @@ import {
 import { createServerFn } from "@tanstack/react-start";
 {{/if}}
 import type { ReactNode } from "react";
+{{#if withShadcn}}
 import { Toaster } from "@workspace/ui/components/sonner";
 import { cn } from "@workspace/ui/lib/utils";
 import appCss from "@workspace/ui/globals.css?url";
 import { ThemeProvider } from "~/components/theme-provider";
+{{else}}
+import appCss from "@/styles/globals.css?url";
+{{/if}}
 {{#if withBetterAuth}}
 import { authClient } from "~/lib/auth-client";
 import { getToken } from "~/lib/auth-server";
@@ -91,15 +95,23 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
+{{#if withShadcn}}
     <html lang="en" suppressHydrationWarning className={cn("antialiased")}>
+{{else}}
+    <html lang="en" suppressHydrationWarning className="antialiased">
+{{/if}}
       <head>
         <HeadContent />
       </head>
       <body>
+{{#if withShadcn}}
         <ThemeProvider>
           {children}
           <Toaster />
         </ThemeProvider>
+{{else}}
+        {children}
+{{/if}}
         <Scripts />
       </body>
     </html>

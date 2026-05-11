@@ -1,5 +1,7 @@
+{{#if withShadcn}}
 import { Button } from "@workspace/ui/components/button";
 
+{{/if}}
 export default function Page() {
   return (
     <div className="flex min-h-svh p-6">
@@ -7,11 +9,15 @@ export default function Page() {
         <div>
           <h1 className="font-medium">{{projectName}} ready!</h1>
           <p>You may now add components and start building.</p>
+{{#if withShadcn}}
           <Button className="mt-2">Button</Button>
+{{/if}}
         </div>
+{{#if withShadcn}}
         <div className="font-mono text-xs text-muted-foreground">
           (Press <kbd>d</kbd> to toggle dark mode)
         </div>
+{{/if}}
       </div>
     </div>
   );

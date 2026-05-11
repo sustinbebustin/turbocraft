@@ -10,6 +10,7 @@ import { manifest as nextjsMonorepoManifest } from "./variants/nextjs-monorepo.t
 import { manifest as nextjsSingleManifest } from "./variants/nextjs-single.ts";
 import { manifest as tanstackMonorepoManifest } from "./variants/tanstack-monorepo.ts";
 import { manifest as tanstackSingleManifest } from "./variants/tanstack-single.ts";
+import { compatibility as shadcnCompatibility } from "./features/shadcn/compatibility.ts";
 import { compatibility as convexCompatibility } from "./features/convex/compatibility.ts";
 import { compatibility as betterAuthCompatibility } from "./features/better-auth/compatibility.ts";
 
@@ -56,6 +57,7 @@ export const manifest: ManifestRegistry = {
  * and add a line here; the wizard auto-respects the constraint.
  */
 const compatibility: Readonly<Record<Feature, FeatureCompatibility>> = {
+  shadcn: shadcnCompatibility,
   convex: convexCompatibility,
   "better-auth": betterAuthCompatibility,
 };

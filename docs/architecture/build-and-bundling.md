@@ -43,7 +43,8 @@ The shape of `apps/cli/package.json`:
 
 ```jsonc
 {
-  "dependencies": {           // all external, all real npm packages
+  "dependencies": {
+    // all external, all real npm packages
     "@clack/prompts": "...",
     "@effect/platform": "...",
     "citty": "...",
@@ -53,16 +54,17 @@ The shape of `apps/cli/package.json`:
     "picocolors": "...",
     "tinyexec": "...",
     "tinyglobby": "...",
-    "zod": "..."
+    "zod": "...",
   },
-  "devDependencies": {        // inlined or build-time only
+  "devDependencies": {
+    // inlined or build-time only
     "@turbocraft/core": "workspace:*",
     "@turbocraft/templates": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "tsdown": "...",
     "typescript": "...",
-    "vitest": "..."
-  }
+    "vitest": "...",
+  },
 }
 ```
 
@@ -135,18 +137,18 @@ changesets — they bump together.
 
 ## Build commands
 
-| Command            | What it does                                                 |
-|--------------------|--------------------------------------------------------------|
-| `pnpm build`       | turbo build for the whole workspace.                         |
-| `pnpm dev`         | turbo dev (watch mode in every package).                     |
-| `pnpm typecheck`   | `effect-language-service patch && tsc --noEmit` per package. |
-| `pnpm test`        | vitest across all packages.                                  |
-| `pnpm lint`        | oxlint at the repo root.                                     |
-| `pnpm format`      | oxfmt at the repo root (`--disable-nested-config`).          |
+| Command          | What it does                                                 |
+| ---------------- | ------------------------------------------------------------ |
+| `pnpm build`     | turbo build for the whole workspace.                         |
+| `pnpm dev`       | turbo dev (watch mode in every package).                     |
+| `pnpm typecheck` | `effect-language-service patch && tsc --noEmit` per package. |
+| `pnpm test`      | vitest across all packages.                                  |
+| `pnpm lint`      | oxlint at the repo root.                                     |
+| `pnpm format`    | oxfmt at the repo root (`--disable-nested-config`).          |
 
 The `--disable-nested-config` flag matters because template assets ship
 their own `.oxfmtrc.json` files (destined for scaffolded projects). Without
-the flag, oxfmt would descend into them and apply *those* rules to the
+the flag, oxfmt would descend into them and apply _those_ rules to the
 template source.
 
 ## CI verification

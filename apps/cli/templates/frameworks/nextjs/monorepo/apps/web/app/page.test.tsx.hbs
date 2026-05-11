@@ -11,8 +11,10 @@ describe("Page", () => {
     ).toBeInTheDocument();
   });
 
+{{#if withShadcn}}
   it("renders the button", () => {
     render(<Page />);
     expect(screen.getByRole("button", { name: /button/i })).toBeInTheDocument();
   });
+{{/if}}
 });

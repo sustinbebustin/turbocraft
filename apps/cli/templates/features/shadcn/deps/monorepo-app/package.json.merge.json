@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@workspace/ui": "workspace:*",
+    "next-themes": "catalog:"
+  }
+}

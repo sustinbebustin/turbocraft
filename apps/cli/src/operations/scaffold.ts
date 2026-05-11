@@ -65,6 +65,7 @@ export const scaffold = (
       // generator's "what should the new app be called" field (defaults to
       // "web") — keep them disjoint so they don't collide.
       projectName: config.name,
+      withShadcn: config.features.includes("shadcn"),
       withConvex: config.features.includes("convex"),
       withBetterAuth: config.features.includes("better-auth"),
     };

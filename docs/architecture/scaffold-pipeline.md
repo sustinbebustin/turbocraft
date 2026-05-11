@@ -26,9 +26,9 @@ re-parsed through Zod schemas from `@turbocraft/core`:
 
 ```ts
 const framework = args.framework ? Framework.parse(args.framework) : undefined;
-const layout    = args.layout    ? Layout.parse(args.layout)       : undefined;
-const features  = parseFeatures(args.features);
-const pm        = args.pm        ? PackageManager.parse(args.pm)   : undefined;
+const layout = args.layout ? Layout.parse(args.layout) : undefined;
+const features = parseFeatures(args.features);
+const pm = args.pm ? PackageManager.parse(args.pm) : undefined;
 ```
 
 This is the boundary at which untrusted CLI input becomes typed internal
@@ -64,7 +64,7 @@ Phases:
 
 ```ts
 const variantId = variantIdFor(config.framework, config.layout);
-const manifest  = yield* templates.get(variantId);
+const manifest = yield * templates.get(variantId);
 ```
 
 `TemplatesService.get` looks up the variant in the registry from
@@ -82,7 +82,7 @@ known-bad target.
 ### 3. Seed layers
 
 ```ts
-yield* seedTarget({ manifest, targetDir, features, answers });
+yield * seedTarget({ manifest, targetDir, features, answers });
 ```
 
 `seedTarget` ([`apps/cli/src/operations/seed.ts`](../../apps/cli/src/operations/seed.ts))
@@ -104,7 +104,7 @@ and deep-merge rules.
 ### 4. Initial generators
 
 ```ts
-yield* runInitialGenerators({ manifest, targetDir, answers });
+yield * runInitialGenerators({ manifest, targetDir, answers });
 ```
 
 Each entry in `manifest.initialGenerators` is invoked via Plop with merged
@@ -132,7 +132,7 @@ chosen pm; output is streamed.
 type ScaffoldReport = {
   readonly variant: string;
   readonly targetDir: string;
-  readonly created: ReadonlyArray<string>;  // files seeded + generated
+  readonly created: ReadonlyArray<string>; // files seeded + generated
   readonly installed: boolean;
   readonly gitInitialised: boolean;
 };
@@ -145,14 +145,14 @@ type ScaffoldReport = {
 
 Failures bubble up as Effect errors with structured tags:
 
-| Tag              | Origin                                              |
-|------------------|-----------------------------------------------------|
-| `UserCancelled`  | Wizard cancellation.                                |
-| `InvalidConfig`  | Zod refinement failure post-wizard.                 |
-| `FsError`        | Filesystem op (ensure-empty, read, write, mkdir).   |
-| `ManifestError`  | Unknown variant id.                                 |
-| `GeneratorError` | Plop generator failure.                             |
-| `ProcessError`   | `git init` / install command non-zero exit.         |
+| Tag              | Origin                                            |
+| ---------------- | ------------------------------------------------- |
+| `UserCancelled`  | Wizard cancellation.                              |
+| `InvalidConfig`  | Zod refinement failure post-wizard.               |
+| `FsError`        | Filesystem op (ensure-empty, read, write, mkdir). |
+| `ManifestError`  | Unknown variant id.                               |
+| `GeneratorError` | Plop generator failure.                           |
+| `ProcessError`   | `git init` / install command non-zero exit.       |
 
 `create.ts` wraps the program in `Effect.runPromiseExit` and prints
 `Cause.pretty(...)` on `Failure` — every error gets a structured trace.

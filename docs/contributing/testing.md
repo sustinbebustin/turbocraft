@@ -2,10 +2,10 @@
 
 ## Test inventory
 
-| Suite                                                                      | What it covers                                                       |
-|----------------------------------------------------------------------------|----------------------------------------------------------------------|
-| [`apps/cli/test/scaffold.test.ts`](../../apps/cli/test/scaffold.test.ts)   | End-to-end scaffold of every variant into a temp dir.                |
-| [`packages/core/src/schema.test.ts`](../../packages/core/src/schema.test.ts) | Zod schema parsing + the better-auth/convex refinement.            |
+| Suite                                                                        | What it covers                                          |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [`apps/cli/test/scaffold.test.ts`](../../apps/cli/test/scaffold.test.ts)     | End-to-end scaffold of every variant into a temp dir.   |
+| [`packages/core/src/schema.test.ts`](../../packages/core/src/schema.test.ts) | Zod schema parsing + the better-auth/convex refinement. |
 
 Run everything from the repo root:
 
@@ -36,7 +36,7 @@ variant it:
 
 It runs with `--no-install --no-git`-equivalent options so each test takes
 milliseconds, not seconds. The point isn't to verify the generated project
-*builds* — that's a separate (manual) smoke check. The point is to verify
+_builds_ — that's a separate (manual) smoke check. The point is to verify
 that the layer composition produces a structurally valid project.
 
 ### When to extend it
@@ -49,9 +49,9 @@ Add a case whenever you:
 
 The existing tests are the template.
 
-### When *not* to extend it
+### When _not_ to extend it
 
-Avoid asserting on file *contents* unless the test is verifying a specific
+Avoid asserting on file _contents_ unless the test is verifying a specific
 templating concern (e.g. that `{{projectName}}` was rendered, that a
 `.merge.json` deep-merge produced the right shape). Asserting "this file
 contains the literal string X" makes the test brittle and slow without
@@ -66,7 +66,7 @@ catching real bugs.
 - The better-auth/convex refinement.
 
 When you add a feature with an inter-feature dependency, mirror the rule
-in the schema refinement *and* add a schema test for the rejection path.
+in the schema refinement _and_ add a schema test for the rejection path.
 
 ## Property tests
 

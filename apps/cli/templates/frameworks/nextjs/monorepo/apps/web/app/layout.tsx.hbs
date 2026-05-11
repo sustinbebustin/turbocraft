@@ -1,12 +1,16 @@
 import { Geist_Mono, DM_Sans } from "next/font/google";
 
+{{#if withShadcn}}
 import "@workspace/ui/globals.css";
 import { Toaster } from "@workspace/ui/components/sonner";
 import { cn } from "@workspace/ui/lib/utils";
+import { ThemeProvider } from "@/components/theme-provider";
+{{else}}
+import "./globals.css";
+{{/if}}
 {{#if withConvex}}
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 {{/if}}
-import { ThemeProvider } from "@/components/theme-provider";
 {{#if withBetterAuth}}
 import { getToken } from "@/lib/auth-server";
 {{/if}}
@@ -30,14 +34,19 @@ export default {{#if withBetterAuth}}async {{/if}}function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
+{{#if withShadcn}}
       className={cn(
         "antialiased",
         fontMono.variable,
         "font-sans",
         dmSans.variable
       )}
+{{else}}
+      className={`antialiased font-sans ${fontMono.variable} ${dmSans.variable}`}
+{{/if}}
     >
       <body>
+{{#if withShadcn}}
         <ThemeProvider>
 {{#if withConvex}}
           <ConvexClientProvider{{#if withBetterAuth}} initialToken={token}{{/if}}>
@@ -49,6 +58,15 @@ export default {{#if withBetterAuth}}async {{/if}}function RootLayout({
           <Toaster />
 {{/if}}
         </ThemeProvider>
+{{else}}
+{{#if withConvex}}
+        <ConvexClientProvider{{#if withBetterAuth}} initialToken={token}{{/if}}>
+          {children}
+        </ConvexClientProvider>
+{{else}}
+        {children}
+{{/if}}
+{{/if}}
       </body>
     </html>
   );

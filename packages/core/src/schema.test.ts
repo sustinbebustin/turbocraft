@@ -34,15 +34,42 @@ describe("ProjectConfig", () => {
   it("rejects better-auth without convex", () => {
     const result = ProjectConfig.safeParse({
       ...valid,
-      features: ["better-auth"],
+      features: ["better-auth", "shadcn"],
+      shadcn: { preset: "default", components: [] },
     });
     expect(result.success).toBe(false);
   });
 
-  it("accepts convex + better-auth together", () => {
+  it("rejects better-auth without shadcn", () => {
     const result = ProjectConfig.safeParse({
       ...valid,
-      features: ["convex", "better-auth"],
+      features: ["better-auth", "convex"],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects shadcn feature without shadcn config", () => {
+    const result = ProjectConfig.safeParse({
+      ...valid,
+      features: ["shadcn"],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts shadcn with a config block", () => {
+    const result = ProjectConfig.safeParse({
+      ...valid,
+      features: ["shadcn"],
+      shadcn: { preset: "default", components: [] },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts convex + better-auth + shadcn together", () => {
+    const result = ProjectConfig.safeParse({
+      ...valid,
+      features: ["convex", "better-auth", "shadcn"],
+      shadcn: { preset: "default", components: [] },
     });
     expect(result.success).toBe(true);
   });

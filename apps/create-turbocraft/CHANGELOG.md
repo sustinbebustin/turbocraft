@@ -39,7 +39,6 @@
 - 61d54b5: Initial release.
 
   Interactive CLI for scaffolding full-stack monorepo templates:
-
   - `nextjs-monorepo` - Next.js 16 + apps/+packages/ with shadcn/ui, Effect, optional Convex + Better Auth
   - `nextjs-single` - Next.js single-app
   - `tanstack-monorepo` - TanStack Start + apps/+packages/

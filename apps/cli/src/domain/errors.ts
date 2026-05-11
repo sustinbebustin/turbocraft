@@ -35,6 +35,11 @@ export class WizardError extends Data.TaggedError("WizardError")<{
   readonly cause: unknown;
 }> {}
 
+export class NetworkError extends Data.TaggedError("NetworkError")<{
+  readonly url: string;
+  readonly cause: unknown;
+}> {}
+
 export type CliError =
   | UserCancelled
   | InvalidConfig
@@ -42,4 +47,5 @@ export type CliError =
   | TargetDirNotEmpty
   | SpawnError
   | PlopError
-  | WizardError;
+  | WizardError
+  | NetworkError;

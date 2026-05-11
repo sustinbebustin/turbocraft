@@ -24,7 +24,6 @@
   interactive flow before failing with an opaque "FsError: An error has
   occurred" when the target dir already existed. The check now runs in
   three places so the failure surfaces immediately:
-
   - before any prompts when `--name` is passed as a positional,
   - inline in the wizard's name validator while the user is typing,
   - as a final safety net in `scaffold` for direct callers.
@@ -41,7 +40,6 @@
 ### Patch Changes
 
 - 5a39092: CLI UX polish:
-
   - Bundle all runtime dependencies into `dist/bin.mjs` so the published
     `turbocraft` package has zero runtime deps. `pnpm create turbocraft`
     now resolves two packages instead of ~129, cutting the noisy progress
@@ -76,7 +74,6 @@
 - 61d54b5: Initial release.
 
   Interactive CLI for scaffolding full-stack monorepo templates:
-
   - `nextjs-monorepo` - Next.js 16 + apps/+packages/ with shadcn/ui, Effect, optional Convex + Better Auth
   - `nextjs-single` - Next.js single-app
   - `tanstack-monorepo` - TanStack Start + apps/+packages/
