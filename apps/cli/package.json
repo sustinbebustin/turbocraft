@@ -40,10 +40,14 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest"
   },
-  "dependencies": {
+  "devDependencies": {
     "@clack/prompts": "catalog:",
     "@effect/platform": "catalog:",
     "@effect/platform-node": "catalog:",
+    "@turbocraft/core": "workspace:*",
+    "@turbocraft/templates": "workspace:*",
+    "@types/node": "catalog:",
+    "@workspace/typescript-config": "workspace:*",
     "citty": "catalog:",
     "effect": "catalog:",
     "handlebars": "catalog:",
@@ -51,15 +55,9 @@
     "picocolors": "catalog:",
     "tinyexec": "catalog:",
     "tinyglobby": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@turbocraft/core": "workspace:*",
-    "@turbocraft/templates": "workspace:*",
-    "@types/node": "catalog:",
-    "@workspace/typescript-config": "workspace:*",
     "tsdown": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod": "catalog:"
   }
 }

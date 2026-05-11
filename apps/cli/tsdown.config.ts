@@ -9,19 +9,4 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   shims: false,
-  deps: {
-    neverBundle: [
-      "node-plop",
-      "@clack/prompts",
-      "citty",
-      "effect",
-      "@effect/platform",
-      "@effect/platform-node",
-      "handlebars",
-      "picocolors",
-      "tinyexec",
-      "tinyglobby",
-      "zod",
-    ],
-  },
 });
