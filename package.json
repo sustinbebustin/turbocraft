@@ -1,13 +1,45 @@
 {
-  "name": "turbocraft",
-  "version": "0.0.1",
-  "description": "Interactive CLI for scaffolding full-stack monorepo templates with your choice of framework, auth, database, and UI.",
-  "license": "MIT",
-  "keywords": ["turborepo", "scaffold", "cli", "generator"],
+  "name": "turbocraft-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Source repo for the turbocraft CLI - scaffolds full-stack monorepo templates.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sustinbebustin/turbocraft.git"
   },
   "homepage": "https://github.com/sustinbebustin/turbocraft#readme",
-  "bugs": { "url": "https://github.com/sustinbebustin/turbocraft/issues" }
+  "bugs": {
+    "url": "https://github.com/sustinbebustin/turbocraft/issues"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --check --disable-nested-config",
+    "format:fix": "oxfmt --disable-nested-config",
+    "typecheck": "effect-language-service patch && turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:watch": "turbo run test:watch",
+    "check:unused": "knip",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "turbo run build --filter=turbocraft --filter=create-turbocraft && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.10",
+    "@effect/language-service": "catalog:",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint-plugin-turbo": "^2.9.9",
+    "knip": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12.0"
+  }
 }

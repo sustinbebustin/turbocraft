@@ -1,0 +1,20 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import { Route } from "./index";
+
+const HomePage = Route.options.component!;
+
+describe("Index page", () => {
+  it("renders the heading", () => {
+    render(<HomePage />);
+    expect(
+      screen.getByRole("heading", { name: /project ready/i })
+    ).toBeInTheDocument();
+  });
+
+  it("renders the button", () => {
+    render(<HomePage />);
+    expect(screen.getByRole("button", { name: /button/i })).toBeInTheDocument();
+  });
+});

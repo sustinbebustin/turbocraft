@@ -1,0 +1,27 @@
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
+    include: ["**/*.{test,spec}.{ts,tsx}"],
+    exclude: ["node_modules", ".output", ".nitro", "dist"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      exclude: [
+        "**/*.config.*",
+        "**/*.test.*",
+        ".output/**",
+        ".nitro/**",
+        "node_modules/**",
+        "src/routeTree.gen.ts",
+      ],
+    },
+  },
+});

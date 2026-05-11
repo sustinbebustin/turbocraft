@@ -1,0 +1,64 @@
+{
+  "name": "turbocraft",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Interactive CLI for scaffolding full-stack monorepo templates with your choice of framework, auth, database, and UI.",
+  "license": "MIT",
+  "keywords": [
+    "turborepo",
+    "scaffold",
+    "cli",
+    "generator",
+    "nextjs",
+    "tanstack"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sustinbebustin/turbocraft.git"
+  },
+  "homepage": "https://github.com/sustinbebustin/turbocraft#readme",
+  "bugs": {
+    "url": "https://github.com/sustinbebustin/turbocraft/issues"
+  },
+  "bin": {
+    "turbocraft": "./dist/bin.mjs"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsdown && node ./scripts/copy-templates.mjs",
+    "dev": "tsdown --watch",
+    "start": "node ./dist/bin.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@clack/prompts": "catalog:",
+    "@effect/platform": "catalog:",
+    "@effect/platform-node": "catalog:",
+    "citty": "catalog:",
+    "effect": "catalog:",
+    "handlebars": "catalog:",
+    "node-plop": "catalog:",
+    "picocolors": "catalog:",
+    "tinyexec": "catalog:",
+    "tinyglobby": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@turbocraft/core": "workspace:*",
+    "@turbocraft/templates": "workspace:*",
+    "@types/node": "catalog:",
+    "@workspace/typescript-config": "workspace:*",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

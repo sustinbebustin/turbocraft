@@ -1,0 +1,9 @@
+{{#if isClient}}"use client";
+
+{{/if}}export default function {{pascalCase name}}Page() {
+  return (
+    <div className="flex min-h-svh p-6">
+      <h1 className="text-lg font-medium">{{pascalCase name}}</h1>
+    </div>
+  );
+}

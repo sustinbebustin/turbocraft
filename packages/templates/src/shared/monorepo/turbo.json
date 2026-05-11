@@ -1,0 +1,63 @@
+{
+  "$schema": "https://v2-9-9.turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "NEXT_PUBLIC_CONVEX_URL",
+    "NEXT_PUBLIC_CONVEX_SITE_URL",
+    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_OAUTH_GOOGLE",
+    "NEXT_PUBLIC_OAUTH_GITHUB"
+  ],
+  "globalPassThroughEnv": [
+    "BETTER_AUTH_SECRET",
+    "CONVEX_DEPLOYMENT",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "SITE_URL"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "//#quality": {
+      "dependsOn": ["//#lint", "//#format"]
+    },
+    "//#quality:fix": {
+      "dependsOn": ["//#lint:fix", "//#format:fix"]
+    },
+    "//#lint": {},
+    "//#lint:fix": {
+      "cache": false
+    },
+    "//#format": {},
+    "//#format:fix": {
+      "dependsOn": ["//#lint:fix"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["transit"]
+    },
+    "test": {
+      "dependsOn": ["transit"]
+    },
+    "test:coverage": {
+      "dependsOn": ["transit"],
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

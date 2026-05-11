@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Effect-TS/language-service/refs/heads/main/schema.json",
+  "display": "Next.js",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }, { "name": "@effect/language-service" }],
+    "jsx": "preserve"
+  }
+}

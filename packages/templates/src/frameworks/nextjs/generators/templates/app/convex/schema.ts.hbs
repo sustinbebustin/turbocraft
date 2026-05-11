@@ -1,0 +1,9 @@
+import { defineSchema } from "convex/server";
+
+{{#if withBetterAuth}}
+// Add your application tables here. Auth tables are managed by the
+// `@convex-dev/better-auth` component and don't need to be declared.
+{{else}}
+// Add your application tables here.
+{{/if}}
+export default defineSchema({});

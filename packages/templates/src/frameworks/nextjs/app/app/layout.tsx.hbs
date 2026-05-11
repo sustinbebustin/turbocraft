@@ -1,0 +1,55 @@
+import { Geist_Mono, DM_Sans } from "next/font/google";
+
+import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+{{#if withConvex}}
+import { ConvexClientProvider } from "@/components/convex-client-provider";
+{{/if}}
+import { ThemeProvider } from "@/components/theme-provider";
+{{#if withBetterAuth}}
+import { getToken } from "@/lib/auth-server";
+{{/if}}
+
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
+
+const fontMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
+
+export default {{#if withBetterAuth}}async {{/if}}function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+{{#if withBetterAuth}}
+  const token = await getToken();
+{{/if}}
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "antialiased",
+        fontMono.variable,
+        "font-sans",
+        dmSans.variable
+      )}
+    >
+      <body>
+        <ThemeProvider>
+{{#if withConvex}}
+          <ConvexClientProvider{{#if withBetterAuth}} initialToken={token}{{/if}}>
+            {children}
+            <Toaster />
+          </ConvexClientProvider>
+{{else}}
+          {children}
+          <Toaster />
+{{/if}}
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

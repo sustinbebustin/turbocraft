@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "endOfLine": "lf",
+  "semi": true,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/.turbo/**",
+    "**/coverage/**",
+    "packages/templates/src/**",
+    "apps/cli/templates/**"
+  ]
+}

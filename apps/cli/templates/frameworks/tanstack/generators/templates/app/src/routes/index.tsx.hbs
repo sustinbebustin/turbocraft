@@ -1,0 +1,27 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+
+export const Route = createFileRoute("/")({
+  component: HomePage,
+});
+
+function HomePage() {
+  return (
+    <div className="flex min-h-svh p-6">
+      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
+        <div>
+          <h1 className="font-medium">{{name}} ready!</h1>
+{{#if description}}
+          <p>{{description}}</p>
+{{else}}
+          <p>You may now add components and start building.</p>
+{{/if}}
+          <Button className="mt-2">Button</Button>
+        </div>
+        <div className="font-mono text-xs text-muted-foreground">
+          (Press <kbd>d</kbd> to toggle dark mode)
+        </div>
+      </div>
+    </div>
+  );
+}

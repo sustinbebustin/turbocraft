@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("{{routeId}}")({
+  component: {{pascalCase name}}Page,
+});
+
+function {{pascalCase name}}Page() {
+  return (
+    <div className="flex min-h-svh p-6">
+      <h1 className="text-lg font-medium">{{pascalCase name}}</h1>
+    </div>
+  );
+}

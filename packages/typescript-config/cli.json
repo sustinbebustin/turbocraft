@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Effect-TS/language-service/refs/heads/main/schema.json",
+  "display": "Node CLI",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "module": "preserve",
+    "moduleResolution": "Bundler",
+    "target": "ES2023",
+    "jsx": "preserve",
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}

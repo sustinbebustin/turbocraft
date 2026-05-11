@@ -1,0 +1,36 @@
+{
+  "name": "{{projectName}}",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --check",
+    "format:fix": "oxfmt",
+    "quality": "echo 'Quality checks passed'",
+    "quality:fix": "echo 'Quality fixes applied'",
+    "typecheck": "effect-language-service patch && turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:watch": "turbo run test:watch",
+    "check:unused": "knip",
+    "gen": "turbo gen"
+  },
+  "devDependencies": {
+    "@effect/language-service": "catalog:",
+    "@turbo/gen": "catalog:",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint-plugin-turbo": "^2.9.9",
+    "knip": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

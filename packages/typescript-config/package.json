@@ -1,0 +1,12 @@
+{
+  "name": "@workspace/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "files": [
+    "base.json",
+    "cli.json",
+    "react-library.json",
+    "nextjs.json"
+  ]
+}

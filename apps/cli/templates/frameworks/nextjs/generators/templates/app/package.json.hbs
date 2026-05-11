@@ -1,0 +1,58 @@
+{
+  "name": "{{name}}",
+  "version": "0.0.1",
+{{#if description}}
+  "description": "{{description}}",
+{{/if}}
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+{{#if withConvex}}
+    "convex": "convex dev",
+{{/if}}
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+{{#if withBetterAuth}}
+    "@convex-dev/better-auth": "catalog:",
+{{/if}}
+    "@phosphor-icons/react": "catalog:",
+    "@workspace/shared": "workspace:*",
+    "@workspace/ui": "workspace:*",
+{{#if withBetterAuth}}
+    "better-auth": "catalog:",
+{{/if}}
+{{#if withConvex}}
+    "convex": "catalog:",
+{{/if}}
+    "next": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sonner": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "catalog:",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@workspace/typescript-config": "workspace:*",
+    "fast-check": "catalog:",
+    "jsdom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

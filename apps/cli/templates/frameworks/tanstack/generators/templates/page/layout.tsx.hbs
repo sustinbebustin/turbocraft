@@ -1,0 +1,9 @@
+import { Outlet, createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("{{routeId}}")({
+  component: {{pascalCase name}}Layout,
+});
+
+function {{pascalCase name}}Layout() {
+  return <Outlet />;
+}

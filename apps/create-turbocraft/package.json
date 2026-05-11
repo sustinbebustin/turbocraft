@@ -1,0 +1,27 @@
+{
+  "name": "create-turbocraft",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "npm create turbocraft@latest -- shim that forwards to the `turbocraft create` command.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sustinbebustin/turbocraft.git"
+  },
+  "homepage": "https://github.com/sustinbebustin/turbocraft#readme",
+  "bugs": {
+    "url": "https://github.com/sustinbebustin/turbocraft/issues"
+  },
+  "bin": {
+    "create-turbocraft": "./bin/index.mjs"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "turbocraft": "workspace:*"
+  }
+}

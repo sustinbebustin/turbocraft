@@ -1,0 +1,69 @@
+{
+  "name": "{{name}}",
+  "version": "0.0.1",
+{{#if description}}
+  "description": "{{description}}",
+{{/if}}
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+{{#if withConvex}}
+    "convex": "convex dev",
+{{/if}}
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+{{#if withBetterAuth}}
+    "@convex-dev/better-auth": "catalog:",
+{{/if}}
+{{#if withConvex}}
+    "@convex-dev/react-query": "catalog:",
+{{/if}}
+    "@phosphor-icons/react": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-router-devtools": "catalog:",
+    "@tanstack/react-router-ssr-query": "catalog:",
+    "@tanstack/react-router-with-query": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "@workspace/shared": "workspace:*",
+    "@workspace/ui": "workspace:*",
+{{#if withBetterAuth}}
+    "better-auth": "catalog:",
+{{/if}}
+{{#if withConvex}}
+    "convex": "catalog:",
+{{/if}}
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sonner": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@workspace/typescript-config": "workspace:*",
+    "fast-check": "catalog:",
+    "jsdom": "catalog:",
+    "nitro": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

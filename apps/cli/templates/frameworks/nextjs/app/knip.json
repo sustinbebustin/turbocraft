@@ -1,0 +1,13 @@
+{
+  "entry": [
+    "app/**/page.tsx",
+    "app/**/layout.tsx",
+    "app/**/route.ts",
+    "convex/**/*.ts!",
+    "components/**/*.tsx",
+    "hooks/**/*.ts",
+    "lib/**/*.ts"
+  ],
+  "project": ["**/*.{ts,tsx}"],
+  "ignore": ["convex/_generated/**"]
+}

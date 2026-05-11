@@ -1,0 +1,23 @@
+{
+  "workspaces": {
+    "apps/web": {
+      "entry": [
+        "app/**/page.tsx",
+        "app/**/layout.tsx",
+        "app/**/route.ts",
+        "app/**/actions.ts",
+        "app/**/loading.tsx",
+        "app/**/error.tsx",
+        "app/**/not-found.tsx",
+        "app/**/default.tsx",
+        "next.config.ts",
+        "next-env.d.ts"
+      ],
+      "project": ["**/*.{ts,tsx}"]
+    },
+    "packages/ui": {
+      "entry": ["src/components/*.tsx", "src/hooks/*.ts", "src/lib/*.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  }
+}

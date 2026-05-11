@@ -1,0 +1,11 @@
+{
+  "extends": "@workspace/typescript-config/tanstack.json",
+  "compilerOptions": {
+    "paths": {
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "vite.config.ts", "vitest.config.ts", "vitest.setup.ts"],
+  "exclude": ["node_modules"{{#if withConvex}}, "convex"{{/if}}, ".output", ".nitro", ".tanstack"]
+}
