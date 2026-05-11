@@ -110,6 +110,14 @@ export const createCommand = defineCommand({
 
     const exit = await Effect.runPromiseExit(program);
     if (exit._tag === "Failure") {
+      const failure = Cause.failureOption(exit.cause);
+      if (
+        failure._tag === "Some" &&
+        failure.value._tag === "UserCancelled"
+      ) {
+        // clack already printed "Cancelled."; exit quietly.
+        process.exit(1);
+      }
       const pretty = Cause.pretty(exit.cause);
       console.error(theme.err(pretty));
       process.exit(1);
