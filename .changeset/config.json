@@ -8,7 +8,6 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "turbocraft-monorepo",
     "@turbocraft/core",
     "@turbocraft/templates",
     "@workspace/typescript-config"
