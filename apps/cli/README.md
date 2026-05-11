@@ -1,8 +1,13 @@
-# turbocraft
+<div align="center">
+  <a href="https://github.com/sustinbebustin/turbocraft">
+    <img alt="turbocraft logo" src="https://raw.githubusercontent.com/sustinbebustin/turbocraft/main/docs/assets/turbocraft-logo.png" height="160">
+  </a>
 
 [![npm turbocraft package](https://img.shields.io/npm/v/turbocraft.svg?label=turbocraft)](https://npmjs.org/package/turbocraft)
 [![npm create-turbocraft package](https://img.shields.io/npm/v/create-turbocraft.svg?label=create-turbocraft)](https://npmjs.org/package/create-turbocraft)
 [![license](https://img.shields.io/npm/l/turbocraft.svg)](./LICENSE)
+
+</div>
 
 Scaffold a production-ready Next.js or TanStack Start project — monorepo or single-app — with one command.
 
