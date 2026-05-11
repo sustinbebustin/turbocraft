@@ -9,7 +9,7 @@ export type RunGeneratorInput = {
   readonly answers: Readonly<Record<string, unknown>>;
 };
 
-export const runInitialGenerators = (
+export const runInitialGenerators = Effect.fn("runInitialGenerators")((
   input: RunGeneratorInput
 ): Effect.Effect<ReadonlyArray<string>, PlopError, PlopService> =>
   Effect.gen(function* () {
@@ -27,4 +27,5 @@ export const runInitialGenerators = (
       created.push(...changes);
     }
     return created;
-  });
+  }),
+);

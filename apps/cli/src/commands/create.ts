@@ -1,5 +1,5 @@
 import { defineCommand } from "citty";
-import { Effect, Layer, Cause } from "effect";
+import { Effect } from "effect";
 import { resolve } from "node:path";
 import { spinner, log } from "@clack/prompts";
 import {
@@ -23,42 +23,28 @@ import {
   setupShadcn,
   type ShadcnSetupReport,
 } from "../operations/setup-shadcn.ts";
-import { FileSystemLive } from "../services/FileSystem.ts";
-import { PlopLive } from "../services/Plop.ts";
-import { PackageManagerLive } from "../services/PackageManager.ts";
-import { ProcessLive } from "../services/Process.ts";
-import { ShadcnRegistryLive } from "../services/ShadcnRegistry.ts";
-import { TemplatesLive } from "../services/Templates.ts";
+import { InvalidConfig } from "../domain/errors.ts";
+import { MainLive } from "../services/Live.ts";
+import { runCli } from "../runtime/run.ts";
 import { theme } from "../ui/theme.ts";
 
-const formatTargetDirNotEmpty = (
-  path: string,
-  conflicts: ReadonlyArray<string>
-): string => {
-  const header = `Target directory ${theme.code(path)} is not empty.`;
-  const list = conflicts.map((name) => `  ${name}`).join("\n");
-  const hint =
-    `Pick a different project name, or remove the existing directory:\n` +
-    `  ${theme.code(`rm -rf ${path}`)}`;
-  return [theme.err(header), list, "", hint].join("\n");
-};
-
-const parseFeatures = (raw: string | undefined): ReadonlyArray<FeatureT> => {
-  if (raw === undefined || raw.length === 0) return [];
+const parseFeatures = (
+  raw: string | undefined
+): Effect.Effect<ReadonlyArray<FeatureT>, InvalidConfig> => {
+  if (raw === undefined || raw.length === 0) return Effect.succeed([]);
   const valid = Feature.options;
-  return raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((s) => {
-      const parsed = Feature.safeParse(s);
-      if (!parsed.success) {
-        throw new Error(
-          `Unknown feature '${s}'. Valid features: ${valid.join(", ")}.`
-        );
-      }
-      return parsed.data;
-    });
+  const issues: Array<string> = [];
+  const result: Array<FeatureT> = [];
+  for (const s of raw.split(",").map((t) => t.trim()).filter(Boolean)) {
+    const parsed = Feature.safeParse(s);
+    if (!parsed.success) {
+      issues.push(`Unknown feature '${s}'. Valid features: ${valid.join(", ")}.`);
+    } else {
+      result.push(parsed.data);
+    }
+  }
+  if (issues.length > 0) return Effect.fail(new InvalidConfig({ issues }));
+  return Effect.succeed(result);
 };
 
 // `--shadcn-components` accepts:
@@ -236,33 +222,7 @@ export const createCommand = defineCommand({
     showIntro();
 
     const cwd = process.cwd();
-    const framework = args.framework
-      ? Framework.parse(args.framework)
-      : undefined;
-    const layout = args.layout ? Layout.parse(args.layout) : undefined;
-    const features = parseFeatures(args.features);
-    const pm = args.pm ? PackageManager.parse(args.pm) : undefined;
-
-    // Validate the positional name eagerly so the user doesn't click through
-    // the entire wizard before learning their name is malformed (e.g. they
-    // passed a path like `/tmp/foo` instead of a kebab-case slug).
     const nameInput = typeof args.name === "string" ? args.name : undefined;
-    if (nameInput !== undefined) {
-      const parsed = ProjectName.safeParse(nameInput);
-      if (!parsed.success) {
-        const issue =
-          parsed.error.issues[0]?.message ?? "Invalid project name.";
-        console.error(
-          theme.err(
-            `Invalid project name ${theme.code(nameInput)}: ${issue}\n` +
-              `Pass a kebab-case slug (e.g. ${theme.code("my-app")}). ` +
-              `The project will be created at ${theme.code("<cwd>/<name>")}.`
-          )
-        );
-        process.exit(1);
-      }
-    }
-
     const shadcnPresetFlag =
       typeof args["shadcn-preset"] === "string" &&
       args["shadcn-preset"].length > 0
@@ -275,6 +235,28 @@ export const createCommand = defineCommand({
     );
 
     const program = Effect.gen(function* () {
+      // Validate CLI args inside the Effect pipeline so errors flow through runCli.
+      if (nameInput !== undefined) {
+        const parsed = ProjectName.safeParse(nameInput);
+        if (!parsed.success) {
+          const issue =
+            parsed.error.issues[0]?.message ?? "Invalid project name.";
+          return yield* new InvalidConfig({
+            issues: [
+              `Invalid project name '${nameInput}': ${issue}. ` +
+                `Pass a kebab-case slug (e.g. my-app).`,
+            ],
+          });
+        }
+      }
+
+      const framework = args.framework
+        ? Framework.parse(args.framework)
+        : undefined;
+      const layout = args.layout ? Layout.parse(args.layout) : undefined;
+      const features = yield* parseFeatures(args.features);
+      const pm = args.pm ? PackageManager.parse(args.pm) : undefined;
+
       const config = yield* runWizard({
         cwd,
         name: nameInput,
@@ -299,9 +281,6 @@ export const createCommand = defineCommand({
         )
       );
 
-      // Setup runs only when install ran AND the relevant feature is on;
-      // otherwise we return a no-op report. Stdio inherits to the user's
-      // terminal so prompts (Convex login URL, shadcn confirm) print normally.
       const wantsShadcnSetup =
         report.installed &&
         config.features.includes("shadcn") &&
@@ -347,47 +326,9 @@ export const createCommand = defineCommand({
         }
       }
 
-      return { config, report, convex, shadcn };
-    }).pipe(
-      Effect.provide(
-        Layer.mergeAll(
-          FileSystemLive,
-          PackageManagerLive.pipe(Layer.provide(ProcessLive)),
-          ProcessLive,
-          PlopLive,
-          ShadcnRegistryLive,
-          TemplatesLive
-        )
-      )
-    );
+      showOutro(composeOutro(config, report, convex, shadcn));
+    }).pipe(Effect.provide(MainLive));
 
-    const exit = await Effect.runPromiseExit(program);
-    if (exit._tag === "Failure") {
-      const failure = Cause.failureOption(exit.cause);
-      if (failure._tag === "Some") {
-        const err = failure.value;
-        if (err._tag === "UserCancelled") {
-          // clack already printed "Cancelled."; exit quietly.
-          process.exit(1);
-        }
-        if (err._tag === "TargetDirNotEmpty") {
-          console.error(formatTargetDirNotEmpty(err.path, err.conflicts));
-          process.exit(1);
-        }
-        if (err._tag === "InvalidConfig") {
-          console.error(theme.err("Invalid configuration:"));
-          for (const issue of err.issues) {
-            console.error(theme.err(`  - ${issue}`));
-          }
-          process.exit(1);
-        }
-      }
-      const pretty = Cause.pretty(exit.cause);
-      console.error(theme.err(pretty));
-      process.exit(1);
-    }
-
-    const { config, report, convex, shadcn } = exit.value;
-    showOutro(composeOutro(config, report, convex, shadcn));
+    await runCli(program);
   },
 });

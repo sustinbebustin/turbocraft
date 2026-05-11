@@ -9,6 +9,8 @@ import { ProcessService } from "../services/Process.ts";
 import { TemplatesService } from "../services/Templates.ts";
 import {
   FsError,
+  MergeParseError,
+  PathEscape,
   PlopError,
   SpawnError,
   TargetDirNotEmpty,
@@ -33,18 +35,19 @@ export type ScaffoldReport = {
  * for the interactive browser-login flow, which conflicts with this
  * pipeline's spinner UI.
  */
-export const scaffold = (
-  config: ProjectConfig
-): Effect.Effect<
-  ScaffoldReport,
-  FsError | TargetDirNotEmpty | SpawnError | PlopError | ManifestError,
-  | FileSystemService
-  | PlopService
-  | PackageManagerService
-  | ProcessService
-  | TemplatesService
-> =>
-  Effect.gen(function* () {
+export const scaffold = Effect.fn("scaffold")(
+  (
+    config: ProjectConfig
+  ): Effect.Effect<
+    ScaffoldReport,
+    FsError | PathEscape | MergeParseError | TargetDirNotEmpty | SpawnError | PlopError | ManifestError,
+    | FileSystemService
+    | PlopService
+    | PackageManagerService
+    | ProcessService
+    | TemplatesService
+  > =>
+    Effect.gen(function* () {
     const templates = yield* TemplatesService;
     const fs = yield* FileSystemService;
 
@@ -61,45 +64,40 @@ export const scaffold = (
     }
 
     const initialAnswers = {
-      // `projectName` is the user's chosen project name. `name` is the Plop
-      // generator's "what should the new app be called" field (defaults to
-      // "web") — keep them disjoint so they don't collide.
       projectName: config.name,
       withShadcn: config.features.includes("shadcn"),
       withConvex: config.features.includes("convex"),
       withBetterAuth: config.features.includes("better-auth"),
     };
 
-    const seeded = yield* seedTarget({
-      manifest,
-      targetDir,
-      features: config.features,
-      answers: initialAnswers,
+    const work = Effect.gen(function* () {
+      const seeded = yield* seedTarget({
+        manifest,
+        targetDir,
+        features: config.features,
+        answers: initialAnswers,
+      });
+
+      const generated = yield* runInitialGenerators({
+        manifest,
+        targetDir,
+        answers: initialAnswers,
+      });
+
+      if (config.git) yield* initGit(targetDir);
+      if (config.install) yield* installDeps(targetDir, config.packageManager);
+
+      return {
+        variant: variantId,
+        targetDir,
+        created: [...seeded, ...generated],
+        installed: config.install,
+        gitInitialised: config.git,
+      } satisfies ScaffoldReport;
     });
 
-    const generated = yield* runInitialGenerators({
-      manifest,
-      targetDir,
-      answers: initialAnswers,
-    });
-
-    let gitInitialised = false;
-    if (config.git) {
-      yield* initGit(targetDir);
-      gitInitialised = true;
-    }
-
-    let installed = false;
-    if (config.install) {
-      yield* installDeps(targetDir, config.packageManager);
-      installed = true;
-    }
-
-    return {
-      variant: variantId,
-      targetDir,
-      created: [...seeded, ...generated],
-      installed,
-      gitInitialised,
-    } satisfies ScaffoldReport;
-  });
+    return yield* work.pipe(
+      Effect.onError(() => fs.rm(targetDir).pipe(Effect.ignore))
+    );
+  }),
+);

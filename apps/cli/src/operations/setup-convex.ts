@@ -138,7 +138,7 @@ const writeSiteUrl = (
  * `skippedReason` so the outro can print fallback commands. The repo is
  * always left in a runnable state — the user can finish by hand.
  */
-export const setupConvex = (
+export const setupConvex = Effect.fn("setupConvex")((
   config: ProjectConfig
 ): Effect.Effect<ConvexSetupReport, never, ProcessService> => {
   if (!config.install || !config.features.includes("convex")) {
@@ -183,19 +183,23 @@ export const setupConvex = (
       Effect.catchTag("FsError", () => Effect.succeed(false))
     );
 
-    let betterAuthSecretSet = false;
-    if (wantsBetterAuth) {
-      const secret = randomBytes(32).toString("base64");
-      betterAuthSecretSet = yield* proc
-        .run(bin, ["env", "set", "BETTER_AUTH_SECRET", secret], {
-          cwd: convexCwd,
-          interactive: true,
-        })
-        .pipe(
-          Effect.as(true),
-          Effect.catchTag("SpawnError", () => Effect.succeed(false))
-        );
-    }
+    const betterAuthSecretSet = wantsBetterAuth
+      ? yield* proc
+          .run(
+            bin,
+            [
+              "env",
+              "set",
+              "BETTER_AUTH_SECRET",
+              randomBytes(32).toString("base64"),
+            ],
+            { cwd: convexCwd, interactive: true }
+          )
+          .pipe(
+            Effect.as(true),
+            Effect.catchTag("SpawnError", () => Effect.succeed(false))
+          )
+      : false;
 
     return {
       convexConfigured: true,
@@ -206,4 +210,4 @@ export const setupConvex = (
         : {}),
     };
   });
-};
+});

@@ -82,7 +82,7 @@ const live = PlopService.of({
         yield* scopedChdir;
         return yield* runActions;
       })
-    );
+    ).pipe(Effect.withSpan("Plop.run"));
   },
 });
 

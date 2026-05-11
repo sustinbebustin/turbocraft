@@ -25,7 +25,9 @@ export const PackageManagerLive = Layer.effect(
       install: ({ cwd, packageManager }) =>
         // pnpm, npm and bun all use `install` — kept as a literal rather than
         // a per-PM branch since the args coincide.
-        proc.run(packageManager, ["install"], { cwd }).pipe(Effect.asVoid),
+        proc
+          .run(packageManager, ["install"], { cwd })
+          .pipe(Effect.asVoid, Effect.withSpan("PackageManager.install")),
     };
   })
 );

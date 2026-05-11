@@ -1,19 +1,12 @@
 import { defineCommand } from "citty";
-import { x } from "tinyexec";
-import { existsSync, readFileSync } from "node:fs";
+import { Effect } from "effect";
 import { resolve, join } from "node:path";
+import { readFileSync } from "node:fs";
+import { FileSystemService } from "../services/FileSystem.ts";
+import { ProcessService } from "../services/Process.ts";
+import { MainLive } from "../services/Live.ts";
 import { theme } from "../ui/theme.ts";
 
-/**
- * Inside a turbocraft-generated repo, `turbocraft add app|page` is a thin
- * wrapper over the locally-shipped `turbo gen run <kind>` so users only need to
- * learn one verb. Generators live at `turbo/generators/` in the output.
- */
-
-/**
- * Best-effort: read `packageManager` from the project's `package.json` and
- * return its binary name. Defaults to `pnpm` when unset or unrecognised.
- */
 const detectPackageManager = (cwd: string): string => {
   try {
     const pkg = JSON.parse(readFileSync(join(cwd, "package.json"), "utf8")) as {
@@ -54,20 +47,33 @@ export const addCommand = defineCommand({
     const cwd = resolve(
       typeof args.cwd === "string" ? args.cwd : process.cwd()
     );
-    if (!existsSync(`${cwd}/turbo/generators/config.ts`)) {
-      console.error(
-        theme.err(
-          `No turbo/generators/config.ts found in ${cwd}. Run from a turbocraft project root.`
-        )
+
+    const program = Effect.gen(function* () {
+      const fs = yield* FileSystemService;
+      const proc = yield* ProcessService;
+
+      const hasGenerators = yield* fs.exists(
+        `${cwd}/turbo/generators/config.ts`
       );
-      process.exit(1);
-    }
-    const pm = detectPackageManager(cwd);
-    const result = await x(pm, ["turbo", "gen", "run", String(args.kind)], {
-      nodeOptions: { cwd, stdio: "inherit" },
+      if (!hasGenerators) {
+        console.error(
+          theme.err(
+            `No turbo/generators/config.ts found in ${cwd}. Run from a turbocraft project root.`
+          )
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      const pm = detectPackageManager(cwd);
+      yield* proc.run(pm, ["turbo", "gen", "run", String(args.kind)], {
+        cwd,
+        interactive: true,
+      });
+    }).pipe(Effect.provide(MainLive));
+
+    await Effect.runPromise(program).catch(() => {
+      process.exitCode = 1;
     });
-    if (result.exitCode !== 0) {
-      process.exit(result.exitCode ?? 1);
-    }
   },
 });

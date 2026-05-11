@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { ProjectConfig, variantIdFor } from "./schema.ts";
+import { describe, expect, it } from "@effect/vitest";
+import fc from "fast-check";
+import { ProjectConfig, ProjectName, variantIdFor, type Feature } from "./schema.ts";
 
 describe("variantIdFor", () => {
   it("maps framework + layout to variant ids", () => {
@@ -72,5 +73,107 @@ describe("ProjectConfig", () => {
       shadcn: { preset: "default", components: [] },
     });
     expect(result.success).toBe(true);
+  });
+});
+
+const lowerAlnum = fc.constantFrom(
+  ..."abcdefghijklmnopqrstuvwxyz0123456789"
+);
+const segment = fc
+  .array(lowerAlnum, { minLength: 1, maxLength: 10 })
+  .map((cs) => cs.join(""));
+const kebabCase = fc
+  .tuple(
+    segment.filter((s) => /^[a-z]/u.test(s)),
+    fc.array(segment, { minLength: 0, maxLength: 5 })
+  )
+  .map(([head, rest]) => [head, ...rest].join("-"));
+
+describe("ProjectName (property)", () => {
+  it("accepts all valid kebab-case names", () => {
+    fc.assert(
+      fc.property(kebabCase, (name) => {
+        expect(ProjectName.safeParse(name).success).toBe(true);
+      })
+    );
+  });
+
+  it("rejects any name containing uppercase letters", () => {
+    const mixedChar = fc.constantFrom(
+      ..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
+    );
+    const withUpper = fc
+      .array(mixedChar, { minLength: 1, maxLength: 20 })
+      .map((cs) => cs.join(""))
+      .filter((s) => /[A-Z]/u.test(s));
+    fc.assert(
+      fc.property(withUpper, (name) => {
+        expect(ProjectName.safeParse(name).success).toBe(false);
+      })
+    );
+  });
+
+  it("rejects empty strings", () => {
+    expect(ProjectName.safeParse("").success).toBe(false);
+  });
+});
+
+describe("ProjectConfig feature constraints (property)", () => {
+  const baseConfig = {
+    name: "my-app",
+    targetDir: "/tmp/my-app",
+    framework: "nextjs" as const,
+    layout: "monorepo" as const,
+    packageManager: "pnpm" as const,
+    install: false,
+    git: false,
+  };
+
+  it("better-auth without convex always fails", () => {
+    const featuresWithoutConvex = fc
+      .subarray<Feature>(["shadcn", "better-auth"])
+      .filter((fs) => fs.includes("better-auth") && !fs.includes("convex"));
+    fc.assert(
+      fc.property(featuresWithoutConvex, (features) => {
+        const result = ProjectConfig.safeParse({
+          ...baseConfig,
+          features: [...features],
+          shadcn: features.includes("shadcn")
+            ? { preset: "default", components: [] }
+            : undefined,
+        });
+        expect(result.success).toBe(false);
+      })
+    );
+  });
+
+  it("better-auth without shadcn always fails", () => {
+    const featuresWithoutShadcn = fc
+      .subarray<Feature>(["convex", "better-auth"])
+      .filter((fs) => fs.includes("better-auth") && !fs.includes("shadcn"));
+    fc.assert(
+      fc.property(featuresWithoutShadcn, (features) => {
+        const result = ProjectConfig.safeParse({
+          ...baseConfig,
+          features: [...features],
+        });
+        expect(result.success).toBe(false);
+      })
+    );
+  });
+
+  it("shadcn feature without config always fails", () => {
+    const featuresWithShadcn = fc
+      .subarray<Feature>(["shadcn", "convex", "better-auth"])
+      .filter((fs) => fs.includes("shadcn"));
+    fc.assert(
+      fc.property(featuresWithShadcn, (features) => {
+        const result = ProjectConfig.safeParse({
+          ...baseConfig,
+          features: [...features],
+        });
+        expect(result.success).toBe(false);
+      })
+    );
   });
 });
