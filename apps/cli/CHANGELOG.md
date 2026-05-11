@@ -1,5 +1,41 @@
 # turbocraft
 
+## 0.2.0
+
+### Minor Changes
+
+- d51c792: Generated projects now run Convex and the web app from a single
+  `pnpm dev`. Monorepos pick up a `dev:convex` turbo task and a root
+  `dev` script that runs both in parallel; singles use `convex dev
+--start` to supervise the frontend from one process.
+
+  When `--install` is enabled, the CLI now also configures Convex
+  end-to-end after dependencies install: it seeds `.env.local`, runs
+  `convex dev --once` to create a deployment, writes
+  `*_CONVEX_SITE_URL`, and (when Better Auth is selected) sets
+  `BETTER_AUTH_SECRET` on the deployment. Each step is best-effort
+  and the outro lists fallback commands if anything is skipped.
+
+### Patch Changes
+
+- e58e9a1: Detect non-empty target directories up front instead of after the wizard.
+
+  `turbocraft create my-app` used to walk the user through the entire
+  interactive flow before failing with an opaque "FsError: An error has
+  occurred" when the target dir already existed. The check now runs in
+  three places so the failure surfaces immediately:
+
+  - before any prompts when `--name` is passed as a positional,
+  - inline in the wizard's name validator while the user is typing,
+  - as a final safety net in `scaffold` for direct callers.
+
+  The new failure message lists the conflicting entries and recommends
+  either picking a different name or `rm -rf <dir>`.
+
+  Breaking: the `--force` flag is removed. `turbocraft create` will not
+  write into a non-empty directory. Remove the directory explicitly to
+  re-scaffold.
+
 ## 0.1.3
 
 ### Patch Changes
