@@ -1,5 +1,12 @@
 # create-turbocraft
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [a43805a]
+  - turbocraft@0.3.1
+
 ## 0.3.0
 
 ### Patch Changes
