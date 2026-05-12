@@ -19,9 +19,9 @@ import {
 import { createServerFn } from "@tanstack/react-start";
 {{/if}}
 import type { ReactNode } from "react";
-import { Toaster } from "@workspace/ui/components/sonner";
-import { cn } from "@workspace/ui/lib/utils";
-import appCss from "@workspace/ui/globals.css?url";
+import { Toaster } from "~/components/ui/sonner";
+import { cn } from "~/lib/utils";
+import appCss from "~/styles/globals.css?url";
 import { ThemeProvider } from "~/components/theme-provider";
 {{#if withBetterAuth}}
 import { authClient } from "~/lib/auth-client";

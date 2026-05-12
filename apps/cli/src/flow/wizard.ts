@@ -233,7 +233,13 @@ const promptShadcnPreset = Effect.fn("promptShadcnPreset")(
     fromFlag: string | undefined
   ): Effect.Effect<string, UserCancelled | WizardError> =>
     Effect.gen(function* () {
-      if (fromFlag !== undefined) return extractPresetCode(fromFlag);
+      if (fromFlag !== undefined) {
+        // Allow `--shadcn-preset default` as a synonym for the bundled default.
+        if (fromFlag.trim().toLowerCase() === "default") {
+          return DEFAULT_SHADCN_PRESET;
+        }
+        return extractPresetCode(fromFlag);
+      }
 
       const choice = yield* promptSelect<"default" | "custom">("shadcnPreset", {
         message: "shadcn preset",

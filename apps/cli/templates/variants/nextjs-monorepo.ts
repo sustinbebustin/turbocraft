@@ -2,8 +2,8 @@ import type { TemplateManifest } from "@turbocraft/core";
 
 /**
  * Turborepo monorepo with a Next.js app at `apps/web`. Shared workspaces:
- * `packages/shared`, `packages/typescript-config`. The shadcn feature adds a
- * `packages/ui` workspace skeleton that `shadcn init` populates.
+ * `packages/shared`, `packages/typescript-config`. The shadcn feature installs
+ * components into `apps/web/components/ui/` via `shadcn init` post-install.
  */
 export const manifest: TemplateManifest = {
   id: "nextjs-monorepo",
@@ -13,7 +13,6 @@ export const manifest: TemplateManifest = {
   ],
   featureLayers: {
     shadcn: [
-      { from: "features/shadcn/monorepo/shared", to: "." },
       { from: "features/shadcn/deps/monorepo-app", to: "apps/web" },
       { from: "features/shadcn/nextjs/files", to: "apps/web" },
     ],

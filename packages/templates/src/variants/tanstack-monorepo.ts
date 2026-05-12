@@ -3,7 +3,8 @@ import type { TemplateManifest } from "@turbocraft/core";
 /**
  * Turborepo monorepo with a TanStack Start app at `apps/web`. Shared
  * workspaces: `packages/shared`, `packages/typescript-config`. The shadcn
- * feature adds a `packages/ui` workspace skeleton that `shadcn init` populates.
+ * feature installs components into `apps/web/src/components/ui/` via
+ * `shadcn init` post-install.
  */
 export const manifest: TemplateManifest = {
   id: "tanstack-monorepo",
@@ -13,7 +14,6 @@ export const manifest: TemplateManifest = {
   ],
   featureLayers: {
     shadcn: [
-      { from: "features/shadcn/monorepo/shared", to: "." },
       { from: "features/shadcn/deps/monorepo-app", to: "apps/web" },
       { from: "features/shadcn/tanstack/files", to: "apps/web" },
     ],

@@ -19,13 +19,11 @@ import {
 import { createServerFn } from "@tanstack/react-start";
 {{/if}}
 import type { ReactNode } from "react";
-{{#if withShadcn}}
-import { Toaster } from "@workspace/ui/components/sonner";
-import { cn } from "@workspace/ui/lib/utils";
-import appCss from "@workspace/ui/globals.css?url";
-import { ThemeProvider } from "~/components/theme-provider";
-{{else}}
 import appCss from "@/styles/globals.css?url";
+{{#if withShadcn}}
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "~/components/theme-provider";
 {{/if}}
 {{#if withBetterAuth}}
 import { authClient } from "~/lib/auth-client";

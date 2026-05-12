@@ -1,8 +1,7 @@
 # nextjs-monorepo-template
 
-Turborepo template for Next.js apps backed by a shared shadcn/ui
-component library. Optimized for fast tooling: Oxlint, Oxfmt, Turbopack,
-and pnpm catalogs.
+Turborepo template for Next.js apps with shadcn/ui installed per-app.
+Optimized for fast tooling: Oxlint, Oxfmt, Turbopack, and pnpm catalogs.
 
 ## Stack
 
@@ -19,27 +18,17 @@ and pnpm catalogs.
 ```
 apps/
   web/                     Next.js app (App Router, Turbopack dev)
-    app/                   Routes (App Router)
+    app/                   Routes (App Router) + globals.css
     components/            App-local React components + providers
+    components/ui/         shadcn primitives (added via shadcn add)
     convex/                Convex backend functions, schema, auth wiring
-    lib/                   App-local helpers (auth client/server, etc.)
+    lib/                   App-local helpers (auth client/server, utils.ts)
 packages/
-  ui/                      @workspace/ui  shadcn component library
   shared/                  @workspace/shared  cross-app domain code
   typescript-config/       @workspace/typescript-config  shared tsconfigs
 turbo/
   generators/              turbo gen scaffolders (see "Code generation")
 ```
-
-`@workspace/ui` exports:
-
-| Subpath                        | Source                           |
-| ------------------------------ | -------------------------------- |
-| `@workspace/ui/components/*`   | `packages/ui/src/components/`    |
-| `@workspace/ui/hooks/*`        | `packages/ui/src/hooks/`         |
-| `@workspace/ui/lib/*`          | `packages/ui/src/lib/`           |
-| `@workspace/ui/globals.css`    | `packages/ui/src/styles/`        |
-| `@workspace/ui/postcss.config` | `packages/ui/postcss.config.mjs` |
 
 ## Quickstart
 
@@ -141,22 +130,17 @@ pnpm check:unused       # knip
 
 ## Adding shadcn components
 
-Components live in `packages/ui/src/components/` and are consumed by
-the app via the `@workspace/ui` exports.
+shadcn is installed per-app. Components live in `apps/web/components/ui/`
+and are imported via `@/components/ui/*`.
 
-To add a new component, run shadcn from the repo root scoped to either
-workspace:
+To add a component:
 
 ```bash
-# Add to the shared library (preferred)
-pnpm dlx shadcn@latest add button -c packages/ui
-
-# Add to the web app only
 pnpm dlx shadcn@latest add button -c apps/web
 ```
 
-Both workspaces have their own `components.json` configured with
-`base-lyra` style, neutral base color, CSS variables, and Phosphor icons.
+`apps/web/components.json` is configured with `base-lyra` style, neutral
+base color, CSS variables, and Phosphor icons.
 
 ## Code generation
 
@@ -171,8 +155,8 @@ pnpm gen page      # add a route to an existing app
 
 **`app`** scaffolds `apps/<name>/` with a `package.json` (catalog refs
 only), the shared `tsconfig`/`postcss`/`vitest` plumbing, a Tailwind v4
-layout that imports `@workspace/ui/globals.css`, a smoke test, and a
-shadcn `components.json`. It then prompts:
+layout that imports `./globals.css`, a smoke test, and a shadcn
+`components.json`. It then prompts:
 
 - _Wire in Convex backend?_ Adds `convex/` (config, schema), the
   `ConvexClientProvider`, and `convex` script.
