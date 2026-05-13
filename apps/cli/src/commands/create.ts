@@ -116,19 +116,23 @@ const fallbackSteps = (
     config.shadcn !== undefined &&
     !shadcn.initialized
   ) {
-    // shadcn's `--monorepo` flag appends `packages/ui` itself, so the fallback
-    // command always runs from the project root (no `cd` needed).
+    // Follow the shadcn docs: run `init` inside the consuming app. For
+    // monorepos that means `apps/web`; for single-app it's the project root.
     const runner =
       config.packageManager === "pnpm"
         ? "pnpm dlx"
         : config.packageManager === "bun"
           ? "bunx --bun"
           : "npx";
-    const tmpl = config.framework === "nextjs" ? "next" : "start";
-    const monorepoFlag = isMonorepo ? " --monorepo" : "";
-    lines.push(
-      `  ${runner} shadcn@latest init --preset ${config.shadcn.preset} --base base --template ${tmpl} --yes${monorepoFlag}`
-    );
+    if (isMonorepo) {
+      lines.push(
+        `  cd apps/web && ${runner} shadcn@latest init --preset ${config.shadcn.preset} --yes && cd ../..`
+      );
+    } else {
+      lines.push(
+        `  ${runner} shadcn@latest init --preset ${config.shadcn.preset} --yes`
+      );
+    }
   }
 
   return lines;

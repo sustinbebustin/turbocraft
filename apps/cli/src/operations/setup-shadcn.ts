@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import { join } from "node:path";
 import type {
   PackageManager as PackageManagerT,
   ProjectConfig,
@@ -59,17 +60,14 @@ const runnerFor = (pm: PackageManagerT): Runner => {
   }
 };
 
-// The `init --template` flag wants the framework key. `next` for Next.js,
-// `start` for TanStack Start.
-const templateFor = (framework: ProjectConfig["framework"]): string =>
-  framework === "nextjs" ? "next" : "start";
-
-// shadcn's `--monorepo` flag is meant to be run from the repo root — shadcn
-// itself appends `packages/ui` to write components.json + populate the UI
-// workspace. Running from `packages/ui` produced the path-doubled
-// `packages/ui/packages/ui/components.json` error.
-// For single-app variants `init` and `add` both run at the project root.
-const shadcnCwdFor = (config: ProjectConfig): string => config.targetDir;
+// shadcn init/add run inside the consuming app — `apps/web` for monorepo
+// layouts, the project root for single-app layouts. shadcn's `--monorepo`
+// flag is reserved for *creating* a new monorepo from scratch (`shadcn init
+// --monorepo --name <pkg>`) and does not work in an existing tree.
+const shadcnCwdFor = (config: ProjectConfig): string =>
+  config.layout === "monorepo"
+    ? join(config.targetDir, "apps", "web")
+    : config.targetDir;
 
 const dedupe = (xs: ReadonlyArray<string>): ReadonlyArray<string> => {
   const seen = new Set<string>();
@@ -84,7 +82,7 @@ const dedupe = (xs: ReadonlyArray<string>): ReadonlyArray<string> => {
 
 /**
  * Post-install setup for shadcn:
- *   1. `<runner> shadcn@latest init --preset <code> --base base --template <next|start> --yes [--monorepo]`
+ *   1. `<runner> shadcn@latest init --preset <code> --yes`
  *   2. `<runner> shadcn@latest add --yes <components>` (or `--all` when
  *      `config.shadcn.components === [SHADCN_ALL_COMPONENTS]`)
  *
@@ -118,18 +116,16 @@ export const setupShadcn = Effect.fn("setupShadcn")((
   return Effect.gen(function* () {
     const proc = yield* ProcessService;
 
+    // Follow https://ui.shadcn.com/docs/installation/next — no --template,
+    // --base, or --monorepo for adding shadcn to an existing project. Just
+    // run init in the consuming app with the preset.
     const initArgs = [
       ...runner.prefix,
       "init",
       "--preset",
       shadcn.preset,
-      "--base",
-      "base",
-      "--template",
-      templateFor(config.framework),
       "--yes",
     ];
-    if (config.layout === "monorepo") initArgs.push("--monorepo");
 
     const initialized = yield* proc
       .run(runner.bin, initArgs, { cwd, interactive: true })

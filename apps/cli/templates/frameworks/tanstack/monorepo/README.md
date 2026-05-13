@@ -1,8 +1,8 @@
 # tanstack-monorepo-template
 
-Turborepo template for TanStack Start apps backed by a shared shadcn/ui
-component library. Optimized for fast tooling: Oxlint, Oxfmt, Vite, and
-pnpm catalogs.
+Turborepo template for TanStack Start apps with shadcn/ui installed
+per-app. Optimized for fast tooling: Oxlint, Oxfmt, Vite, and pnpm
+catalogs.
 
 ## Stack
 
@@ -24,27 +24,18 @@ apps/
     src/
       routes/              File-based routes (TanStack Router)
       components/          App-local React components + providers
-      lib/                 App-local helpers (auth client/server, etc.)
+      components/ui/       shadcn primitives (added via shadcn add)
+      lib/                 App-local helpers (auth client/server, utils.ts)
+      styles/globals.css   Tailwind v4 entry + shadcn theme tokens
       router.tsx           Router + QueryClient + ConvexQueryClient wiring
     convex/                Convex backend functions, schema, auth wiring
     vite.config.ts         Vite + tanstackStart plugin config
 packages/
-  ui/                      @workspace/ui  shadcn component library
   shared/                  @workspace/shared  cross-app domain code
   typescript-config/       @workspace/typescript-config  shared tsconfigs
 turbo/
   generators/              turbo gen scaffolders (see "Code generation")
 ```
-
-`@workspace/ui` exports:
-
-| Subpath                        | Source                           |
-| ------------------------------ | -------------------------------- |
-| `@workspace/ui/components/*`   | `packages/ui/src/components/`    |
-| `@workspace/ui/hooks/*`        | `packages/ui/src/hooks/`         |
-| `@workspace/ui/lib/*`          | `packages/ui/src/lib/`           |
-| `@workspace/ui/globals.css`    | `packages/ui/src/styles/`        |
-| `@workspace/ui/postcss.config` | `packages/ui/postcss.config.mjs` |
 
 ## Quickstart
 
@@ -146,22 +137,17 @@ pnpm check:unused       # knip
 
 ## Adding shadcn components
 
-Components live in `packages/ui/src/components/` and are consumed by
-the app via the `@workspace/ui` exports.
+shadcn is installed per-app. Components live in
+`apps/web/src/components/ui/` and are imported via `~/components/ui/*`.
 
-To add a new component, run shadcn from the repo root scoped to either
-workspace:
+To add a component:
 
 ```bash
-# Add to the shared library (preferred)
-pnpm dlx shadcn@latest add button -c packages/ui
-
-# Add to the web app only
 pnpm dlx shadcn@latest add button -c apps/web
 ```
 
-Both workspaces have their own `components.json` configured with
-`base-lyra` style, neutral base color, CSS variables, and Phosphor icons.
+`apps/web/components.json` is configured with `base-lyra` style, neutral
+base color, CSS variables, and Phosphor icons.
 
 ## Code generation
 
@@ -176,8 +162,8 @@ pnpm gen page      # add a route to an existing app
 
 **`app`** scaffolds `apps/<name>/` with a `package.json` (catalog refs
 only), the shared `tsconfig`/`vite`/`vitest` plumbing, a Tailwind v4
-`__root.tsx` that imports `@workspace/ui/globals.css`, a smoke test, and
-a shadcn `components.json`. It then prompts:
+`__root.tsx` that imports `~/styles/globals.css`, a smoke test, and a
+shadcn `components.json`. It then prompts:
 
 - _Wire in Convex backend?_ Adds `convex/` (config, schema), the
   `ConvexQueryClient` wiring in `router.tsx`, and `convex` script.
