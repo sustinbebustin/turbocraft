@@ -11,5 +11,5 @@ export const MainLive = PackageManagerLive.pipe(
   Layer.provideMerge(FileSystemLive),
   Layer.provideMerge(PlopLive),
   Layer.provideMerge(ShadcnRegistryLive),
-  Layer.provideMerge(TemplatesLive),
+  Layer.provideMerge(TemplatesLive)
 );

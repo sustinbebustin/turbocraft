@@ -11,14 +11,11 @@ export class InvalidConfig extends Schema.TaggedError<InvalidConfig>()(
   { issues: Schema.Array(Schema.String) }
 ) {}
 
-export class FsError extends Schema.TaggedError<FsError>()(
-  "FsError",
-  {
-    op: Schema.String,
-    path: Schema.String,
-    cause: Schema.Defect,
-  }
-) {}
+export class FsError extends Schema.TaggedError<FsError>()("FsError", {
+  op: Schema.String,
+  path: Schema.String,
+  cause: Schema.Defect,
+}) {}
 
 export class TargetDirNotEmpty extends Schema.TaggedError<TargetDirNotEmpty>()(
   "TargetDirNotEmpty",
@@ -28,23 +25,17 @@ export class TargetDirNotEmpty extends Schema.TaggedError<TargetDirNotEmpty>()(
   }
 ) {}
 
-export class SpawnError extends Schema.TaggedError<SpawnError>()(
-  "SpawnError",
-  {
-    command: Schema.String,
-    exitCode: Schema.NullOr(Schema.Number),
-    stderr: Schema.String,
-  }
-) {}
+export class SpawnError extends Schema.TaggedError<SpawnError>()("SpawnError", {
+  command: Schema.String,
+  exitCode: Schema.NullOr(Schema.Number),
+  stderr: Schema.String,
+}) {}
 
-export class PlopError extends Schema.TaggedError<PlopError>()(
-  "PlopError",
-  {
-    variant: Schema.String,
-    generator: Schema.String,
-    cause: Schema.Defect,
-  }
-) {}
+export class PlopError extends Schema.TaggedError<PlopError>()("PlopError", {
+  variant: Schema.String,
+  generator: Schema.String,
+  cause: Schema.Defect,
+}) {}
 
 export class WizardError extends Schema.TaggedError<WizardError>()(
   "WizardError",
@@ -62,14 +53,11 @@ export class NetworkError extends Schema.TaggedError<NetworkError>()(
   }
 ) {}
 
-export class PathEscape extends Schema.TaggedError<PathEscape>()(
-  "PathEscape",
-  {
-    label: Schema.String,
-    parent: Schema.String,
-    child: Schema.String,
-  }
-) {}
+export class PathEscape extends Schema.TaggedError<PathEscape>()("PathEscape", {
+  label: Schema.String,
+  parent: Schema.String,
+  child: Schema.String,
+}) {}
 
 export class MergeParseError extends Schema.TaggedError<MergeParseError>()(
   "MergeParseError",

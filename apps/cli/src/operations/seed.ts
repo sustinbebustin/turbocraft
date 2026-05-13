@@ -166,13 +166,10 @@ const applyEntryEffect = (
       yield* assertContained(ctx.targetDir, resolvedTarget, "symlink target");
       yield* Effect.tryPromise({
         try: () =>
-          fsSymlink(target, destAbs).catch(
-            (err: NodeJS.ErrnoException) => {
-              if (err.code !== "EEXIST") throw err;
-            }
-          ),
-        catch: (cause) =>
-          new FsError({ op: "symlink", path: destAbs, cause }),
+          fsSymlink(target, destAbs).catch((err: NodeJS.ErrnoException) => {
+            if (err.code !== "EEXIST") throw err;
+          }),
+        catch: (cause) => new FsError({ op: "symlink", path: destAbs, cause }),
       });
       ctx.emitted.add(destAbs);
       return;
@@ -215,7 +212,11 @@ const applyEntryEffect = (
     yield* Effect.tryPromise({
       try: () => fsCopyFile(entry.src, destAbs),
       catch: (cause) =>
-        new FsError({ op: "copyFile", path: `${entry.src} -> ${destAbs}`, cause }),
+        new FsError({
+          op: "copyFile",
+          path: `${entry.src} -> ${destAbs}`,
+          cause,
+        }),
     });
     ctx.emitted.add(destAbs);
   });
@@ -229,18 +230,19 @@ const applyLayerEffect = (
     yield* assertContained(ctx.templatesRoot, absFrom, "layer.from");
     const entries = yield* Effect.tryPromise({
       try: () => walkLayer(absFrom),
-      catch: (cause) =>
-        new FsError({ op: "walkLayer", path: absFrom, cause }),
+      catch: (cause) => new FsError({ op: "walkLayer", path: absFrom, cause }),
     });
     const sorted = [...entries].sort((a, b) => a.rel.localeCompare(b.rel));
-    yield* Effect.forEach(sorted, (entry) => applyEntryEffect(layer, entry, ctx), {
-      discard: true,
-    });
+    yield* Effect.forEach(
+      sorted,
+      (entry) => applyEntryEffect(layer, entry, ctx),
+      {
+        discard: true,
+      }
+    );
   });
 
-const flushMergesEffect = (
-  ctx: ApplyContext
-): Effect.Effect<void, FsError> =>
+const flushMergesEffect = (ctx: ApplyContext): Effect.Effect<void, FsError> =>
   Effect.forEach(
     [...ctx.mergeAcc],
     ([destAbs, value]) =>
@@ -281,54 +283,58 @@ const flushMergesEffect = (
     { discard: true }
   );
 
-export const seedTarget = Effect.fn("seedTarget")((
-  input: SeedInput
-): Effect.Effect<
-  ReadonlyArray<string>,
-  FsError | PathEscape | MergeParseError,
-  FileSystemService | TemplatesService
-> =>
-  Effect.gen(function* () {
-    const fs = yield* FileSystemService;
-    const templates = yield* TemplatesService;
-    yield* fs.mkdirp(input.targetDir);
+export const seedTarget = Effect.fn("seedTarget")(
+  (
+    input: SeedInput
+  ): Effect.Effect<
+    ReadonlyArray<string>,
+    FsError | PathEscape | MergeParseError,
+    FileSystemService | TemplatesService
+  > =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystemService;
+      const templates = yield* TemplatesService;
+      yield* fs.mkdirp(input.targetDir);
 
-    const orderedLayers: Array<CopyEntry> = [...input.manifest.layers];
-    if (input.manifest.featureLayers !== undefined) {
-      for (const feature of input.features) {
-        const featureLayers = input.manifest.featureLayers[feature];
-        if (featureLayers !== undefined) {
-          orderedLayers.push(...featureLayers);
+      const orderedLayers: Array<CopyEntry> = [...input.manifest.layers];
+      if (input.manifest.featureLayers !== undefined) {
+        for (const feature of input.features) {
+          const featureLayers = input.manifest.featureLayers[feature];
+          if (featureLayers !== undefined) {
+            orderedLayers.push(...featureLayers);
+          }
         }
       }
-    }
 
-    const ctx: ApplyContext = {
-      templatesRoot: templates.root(),
-      targetDir: resolve(input.targetDir),
-      answers: input.answers,
-      mergeAcc: new Map(),
-      emitted: new Set(),
-    };
+      const ctx: ApplyContext = {
+        templatesRoot: templates.root(),
+        targetDir: resolve(input.targetDir),
+        answers: input.answers,
+        mergeAcc: new Map(),
+        emitted: new Set(),
+      };
 
-    yield* Effect.forEach(
-      orderedLayers,
-      (layer) => applyLayerEffect(layer, ctx),
-      { discard: true }
-    );
-    yield* flushMergesEffect(ctx);
+      yield* Effect.forEach(
+        orderedLayers,
+        (layer) => applyLayerEffect(layer, ctx),
+        { discard: true }
+      );
+      yield* flushMergesEffect(ctx);
 
-    if (input.manifest.generators !== undefined) {
-      const generators = input.manifest.generators;
-      const generatorsSource = resolve(templates.root(), generators.source);
-      const generatorsTarget = resolve(input.targetDir, generators.destination);
-      yield* fs.mkdirp(generatorsTarget);
-      yield* fs.copyDir(generatorsSource, generatorsTarget, {
-        recursive: true,
-      });
-      ctx.emitted.add(generatorsTarget);
-    }
+      if (input.manifest.generators !== undefined) {
+        const generators = input.manifest.generators;
+        const generatorsSource = resolve(templates.root(), generators.source);
+        const generatorsTarget = resolve(
+          input.targetDir,
+          generators.destination
+        );
+        yield* fs.mkdirp(generatorsTarget);
+        yield* fs.copyDir(generatorsSource, generatorsTarget, {
+          recursive: true,
+        });
+        ctx.emitted.add(generatorsTarget);
+      }
 
-    return [...ctx.emitted];
-  }),
+      return [...ctx.emitted];
+    })
 );

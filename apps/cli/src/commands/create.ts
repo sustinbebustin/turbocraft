@@ -35,10 +35,15 @@ const parseFeatures = (
   const valid = Feature.options;
   const issues: Array<string> = [];
   const result: Array<FeatureT> = [];
-  for (const s of raw.split(",").map((t) => t.trim()).filter(Boolean)) {
+  for (const s of raw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean)) {
     const parsed = Feature.safeParse(s);
     if (!parsed.success) {
-      issues.push(`Unknown feature '${s}'. Valid features: ${valid.join(", ")}.`);
+      issues.push(
+        `Unknown feature '${s}'. Valid features: ${valid.join(", ")}.`
+      );
     } else {
       result.push(parsed.data);
     }

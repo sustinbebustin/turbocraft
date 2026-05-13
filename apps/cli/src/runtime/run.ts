@@ -46,7 +46,10 @@ const renderCliError = (
     case "UserCancelled":
       return { code: 1, message: "" };
     case "TargetDirNotEmpty":
-      return { code: 1, message: formatTargetDirNotEmpty(err.path, err.conflicts) };
+      return {
+        code: 1,
+        message: formatTargetDirNotEmpty(err.path, err.conflicts),
+      };
     case "InvalidConfig":
       return {
         code: 1,
@@ -63,7 +66,10 @@ const renderCliError = (
     case "ManifestError":
     case "PathEscape":
     case "MergeParseError":
-      return { code: 1, message: theme.err(`${err._tag}: ${describeError(err)}`) };
+      return {
+        code: 1,
+        message: theme.err(`${err._tag}: ${describeError(err)}`),
+      };
   }
 };
 

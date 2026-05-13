@@ -1,6 +1,11 @@
 import { describe, expect, it } from "@effect/vitest";
 import fc from "fast-check";
-import { ProjectConfig, ProjectName, variantIdFor, type Feature } from "./schema.ts";
+import {
+  ProjectConfig,
+  ProjectName,
+  variantIdFor,
+  type Feature,
+} from "./schema.ts";
 
 describe("variantIdFor", () => {
   it("maps framework + layout to variant ids", () => {
@@ -76,9 +81,7 @@ describe("ProjectConfig", () => {
   });
 });
 
-const lowerAlnum = fc.constantFrom(
-  ..."abcdefghijklmnopqrstuvwxyz0123456789"
-);
+const lowerAlnum = fc.constantFrom(..."abcdefghijklmnopqrstuvwxyz0123456789");
 const segment = fc
   .array(lowerAlnum, { minLength: 1, maxLength: 10 })
   .map((cs) => cs.join(""));
@@ -99,9 +102,7 @@ describe("ProjectName (property)", () => {
   });
 
   it("rejects any name containing uppercase letters", () => {
-    const mixedChar = fc.constantFrom(
-      ..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
-    );
+    const mixedChar = fc.constantFrom(..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef");
     const withUpper = fc
       .array(mixedChar, { minLength: 1, maxLength: 20 })
       .map((cs) => cs.join(""))

@@ -9,23 +9,24 @@ export type RunGeneratorInput = {
   readonly answers: Readonly<Record<string, unknown>>;
 };
 
-export const runInitialGenerators = Effect.fn("runInitialGenerators")((
-  input: RunGeneratorInput
-): Effect.Effect<ReadonlyArray<string>, PlopError, PlopService> =>
-  Effect.gen(function* () {
-    const plop = yield* PlopService;
-    const created: Array<string> = [];
+export const runInitialGenerators = Effect.fn("runInitialGenerators")(
+  (
+    input: RunGeneratorInput
+  ): Effect.Effect<ReadonlyArray<string>, PlopError, PlopService> =>
+    Effect.gen(function* () {
+      const plop = yield* PlopService;
+      const created: Array<string> = [];
 
-    for (const gen of input.manifest.initialGenerators) {
-      const merged = { ...gen.defaultAnswers, ...input.answers };
-      const changes = yield* plop.run({
-        manifest: input.manifest,
-        generator: gen.name,
-        targetDir: input.targetDir,
-        answers: merged,
-      });
-      created.push(...changes);
-    }
-    return created;
-  }),
+      for (const gen of input.manifest.initialGenerators) {
+        const merged = { ...gen.defaultAnswers, ...input.answers };
+        const changes = yield* plop.run({
+          manifest: input.manifest,
+          generator: gen.name,
+          targetDir: input.targetDir,
+          answers: merged,
+        });
+        created.push(...changes);
+      }
+      return created;
+    })
 );

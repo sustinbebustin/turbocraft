@@ -40,7 +40,13 @@ export const scaffold = Effect.fn("scaffold")(
     config: ProjectConfig
   ): Effect.Effect<
     ScaffoldReport,
-    FsError | PathEscape | MergeParseError | TargetDirNotEmpty | SpawnError | PlopError | ManifestError,
+    | FsError
+    | PathEscape
+    | MergeParseError
+    | TargetDirNotEmpty
+    | SpawnError
+    | PlopError
+    | ManifestError,
     | FileSystemService
     | PlopService
     | PackageManagerService
@@ -48,56 +54,57 @@ export const scaffold = Effect.fn("scaffold")(
     | TemplatesService
   > =>
     Effect.gen(function* () {
-    const templates = yield* TemplatesService;
-    const fs = yield* FileSystemService;
+      const templates = yield* TemplatesService;
+      const fs = yield* FileSystemService;
 
-    const variantId = variantIdFor(config.framework, config.layout);
-    const manifest = yield* templates.get(variantId);
+      const variantId = variantIdFor(config.framework, config.layout);
+      const manifest = yield* templates.get(variantId);
 
-    const targetDir = resolve(config.targetDir);
-    const existing = yield* fs.listEntries(targetDir);
-    if (existing.length > 0) {
-      return yield* new TargetDirNotEmpty({
-        path: targetDir,
-        conflicts: existing,
+      const targetDir = resolve(config.targetDir);
+      const existing = yield* fs.listEntries(targetDir);
+      if (existing.length > 0) {
+        return yield* new TargetDirNotEmpty({
+          path: targetDir,
+          conflicts: existing,
+        });
+      }
+
+      const initialAnswers = {
+        projectName: config.name,
+        withShadcn: config.features.includes("shadcn"),
+        withConvex: config.features.includes("convex"),
+        withBetterAuth: config.features.includes("better-auth"),
+      };
+
+      const work = Effect.gen(function* () {
+        const seeded = yield* seedTarget({
+          manifest,
+          targetDir,
+          features: config.features,
+          answers: initialAnswers,
+        });
+
+        const generated = yield* runInitialGenerators({
+          manifest,
+          targetDir,
+          answers: initialAnswers,
+        });
+
+        if (config.git) yield* initGit(targetDir);
+        if (config.install)
+          yield* installDeps(targetDir, config.packageManager);
+
+        return {
+          variant: variantId,
+          targetDir,
+          created: [...seeded, ...generated],
+          installed: config.install,
+          gitInitialised: config.git,
+        } satisfies ScaffoldReport;
       });
-    }
 
-    const initialAnswers = {
-      projectName: config.name,
-      withShadcn: config.features.includes("shadcn"),
-      withConvex: config.features.includes("convex"),
-      withBetterAuth: config.features.includes("better-auth"),
-    };
-
-    const work = Effect.gen(function* () {
-      const seeded = yield* seedTarget({
-        manifest,
-        targetDir,
-        features: config.features,
-        answers: initialAnswers,
-      });
-
-      const generated = yield* runInitialGenerators({
-        manifest,
-        targetDir,
-        answers: initialAnswers,
-      });
-
-      if (config.git) yield* initGit(targetDir);
-      if (config.install) yield* installDeps(targetDir, config.packageManager);
-
-      return {
-        variant: variantId,
-        targetDir,
-        created: [...seeded, ...generated],
-        installed: config.install,
-        gitInitialised: config.git,
-      } satisfies ScaffoldReport;
-    });
-
-    return yield* work.pipe(
-      Effect.onError(() => fs.rm(targetDir).pipe(Effect.ignore))
-    );
-  }),
+      return yield* work.pipe(
+        Effect.onError(() => fs.rm(targetDir).pipe(Effect.ignore))
+      );
+    })
 );

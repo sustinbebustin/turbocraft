@@ -28,8 +28,7 @@ export const makeTestFileSystem = (stub: StubFs = {}) => {
       }),
     copyDir: () => Effect.void,
     isEmptyDir: () => Effect.succeed(true),
-    listEntries: (path) =>
-      Effect.succeed(stub.listEntries?.(path) ?? []),
+    listEntries: (path) => Effect.succeed(stub.listEntries?.(path) ?? []),
   });
 };
 
@@ -55,10 +54,12 @@ export const makeTestShadcnRegistry = (
     fetchComponentNames: () => Effect.succeed(components),
   });
 
-export const makeTestTemplates = (opts: {
-  readonly registry?: Partial<Record<VariantId, TemplateManifest>>;
-  readonly root?: string;
-} = {}) =>
+export const makeTestTemplates = (
+  opts: {
+    readonly registry?: Partial<Record<VariantId, TemplateManifest>>;
+    readonly root?: string;
+  } = {}
+) =>
   Layer.succeed(TemplatesService, {
     registry: (opts.registry ?? {}) as Record<VariantId, TemplateManifest>,
     get: (id) => {
@@ -86,5 +87,5 @@ export const makeTestLive = (opts?: {
     Layer.provideMerge(makeTestFileSystem(opts?.fs)),
     Layer.provideMerge(makeTestPlop()),
     Layer.provideMerge(makeTestShadcnRegistry(opts?.shadcnComponents)),
-    Layer.provideMerge(makeTestTemplates(opts?.templates)),
+    Layer.provideMerge(makeTestTemplates(opts?.templates))
   );

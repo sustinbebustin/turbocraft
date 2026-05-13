@@ -7,9 +7,10 @@ import { theme } from "../ui/theme.ts";
 
 type Check = { readonly label: string; readonly ok: boolean };
 
-const detectLayout = (
-  fs: FileSystemService["Type"]
-): ((cwd: string) => Effect.Effect<"monorepo" | "single" | "unknown">) =>
+const detectLayout =
+  (
+    fs: FileSystemService["Type"]
+  ): ((cwd: string) => Effect.Effect<"monorepo" | "single" | "unknown">) =>
   (cwd) =>
     Effect.gen(function* () {
       if (yield* fs.exists(`${cwd}/pnpm-workspace.yaml`)) return "monorepo";
