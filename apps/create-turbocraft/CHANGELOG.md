@@ -1,5 +1,12 @@
 # create-turbocraft
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [4810579]
+  - turbocraft@0.3.2
+
 ## 0.3.1
 
 ### Patch Changes
@@ -53,6 +60,7 @@
 - 61d54b5: Initial release.
 
   Interactive CLI for scaffolding full-stack monorepo templates:
+
   - `nextjs-monorepo` - Next.js 16 + apps/+packages/ with shadcn/ui, Effect, optional Convex + Better Auth
   - `nextjs-single` - Next.js single-app
   - `tanstack-monorepo` - TanStack Start + apps/+packages/
