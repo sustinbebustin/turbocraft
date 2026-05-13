@@ -1,5 +1,13 @@
 # turbocraft
 
+## 0.3.2
+
+### Patch Changes
+
+- 4810579: Fix shadcn setup failing in monorepo projects: drop the obsolete `--monorepo` flag from `shadcn init`, run init inside the consuming app, and align monorepo templates with shadcn's documented per-app layout (`@/components/ui/*`).
+
+  Pin `@tanstack/react-router`, `@tanstack/react-router-devtools`, `@tanstack/react-router-ssr-query`, and `@tanstack/react-start` to exact versions in TanStack templates to avoid caret-range resolution producing incompatible combinations.
+
 ## 0.3.1
 
 ### Patch Changes
@@ -33,6 +41,7 @@
   the feature even when it isn't listed in `--features`.
 
   Two error-UX bugs are fixed along the way:
+
   - `InvalidConfig` failures used to render as "An error has
     occurred"; every schema issue is now printed on its own line.
   - The positional project name is validated up front with a hint
@@ -64,6 +73,7 @@
   interactive flow before failing with an opaque "FsError: An error has
   occurred" when the target dir already existed. The check now runs in
   three places so the failure surfaces immediately:
+
   - before any prompts when `--name` is passed as a positional,
   - inline in the wizard's name validator while the user is typing,
   - as a final safety net in `scaffold` for direct callers.
@@ -114,6 +124,7 @@
 - 61d54b5: Initial release.
 
   Interactive CLI for scaffolding full-stack monorepo templates:
+
   - `nextjs-monorepo` - Next.js 16 + apps/+packages/ with shadcn/ui, Effect, optional Convex + Better Auth
   - `nextjs-single` - Next.js single-app
   - `tanstack-monorepo` - TanStack Start + apps/+packages/
