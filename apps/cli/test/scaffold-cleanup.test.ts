@@ -4,11 +4,7 @@ import type { ProjectConfig, TemplateManifest } from "@turbocraft/core";
 import { scaffold } from "../src/operations/scaffold.ts";
 import { FileSystemService } from "../src/services/FileSystem.ts";
 import { FsError } from "../src/domain/errors.ts";
-import {
-  makeTestLive,
-  makeTestFileSystem,
-  makeTestTemplates,
-} from "./layers.ts";
+import { makeTestLive } from "./layers.ts";
 
 const fakeManifest: TemplateManifest = {
   id: "nextjs-monorepo",
