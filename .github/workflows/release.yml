@@ -5,13 +5,23 @@ on:
     branches:
       - main
 
+permissions: {}
+
+# Releases must serialize -- the version PR is created/updated against latest main.
 concurrency:
   group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: "1"
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       # changesets pushes tags + creates GitHub releases
       contents: write
@@ -20,33 +30,24 @@ jobs:
       # required for npm OIDC trusted publishing
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           # changesets diffs against tags to find pending releases
           fetch-depth: 0
+          # changesets/action authenticates via GITHUB_TOKEN env, not the
+          # stored git credential -- safe to drop the credential here.
+          persist-credentials: false
 
-      # pnpm version comes from `packageManager` in root package.json
-      # (pnpm@10.33.0). Don't pin `version:` here — action-setup@v6 errors
-      # on conflict with `packageManager`.
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/setup-monorepo
         with:
-          # Node 24 ships with npm >=11.x, which trusted publishing requires.
-          # Engines floor (>=22.12) is unaffected — that controls end-users.
+          # Node 24 ships npm >=11.x, required for npm OIDC trusted publishing.
+          # Engines floor (>=22.12) is unaffected -- that controls end-users.
           node-version: "24"
-          cache: pnpm
           registry-url: "https://registry.npmjs.org"
-          # NOTE: no `NODE_AUTH_TOKEN` / `always-auth` — OIDC handles auth.
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm typecheck
-
-      - run: pnpm test
+          # NOTE: no `NODE_AUTH_TOKEN` / `always-auth` -- OIDC handles auth.
 
       - name: Create release PR or publish
-        uses: changesets/action@v1.8.0
+        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           # `pnpm release` = turbo build (filtered) && changeset publish.
           # changesets autodetects pnpm and runs `pnpm publish` per package,
